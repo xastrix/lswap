@@ -3,7 +3,6 @@
 #include "hooks/hooks.h"
 #include "globals.h"
 
-#include <windows.h>
 #include <locale>
 
 int main(int argc, const char** argv)

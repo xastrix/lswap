@@ -6,7 +6,6 @@
 namespace utils
 {
 	std::string replace_characters(const std::string& str, const std::string& chars_to_replace, const std::string& replacements);
-
 	std::wstring get_current_clipboard(HWND hwnd);
 	void put_in_clipboard(HWND hwnd, const std::wstring& data);
 	std::wstring parse_json(const std::wstring& json);
