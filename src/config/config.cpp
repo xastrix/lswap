@@ -4,8 +4,6 @@
 #include <sstream>
 #include <cstring>
 
-config g_config;
-
 cfg_t config::init()
 {
 	cfg_t cfg;

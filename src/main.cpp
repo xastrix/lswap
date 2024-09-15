@@ -10,14 +10,14 @@ int main(int argc, const char** argv)
 {
 	setlocale(LC_ALL, "");
 
-	cfg_t cfg = g_config.init();
+	g::cfg = config::init();
 
 	cli cli{ [&]() {
 		fmt{ fmt_30ms, fc_none, "lswap is an fast translator of your text from the clipboard" };
 		fmt{ fmt_30ms, fc_none, "lswap version %s\n", LSWAP_VERSION_STRING };
 
 		fmt{ fmt_def, fc_none, "lswap run\n" };
-		fmt{ fmt_def, fc_cyan, "      Run in background mode ( %s > %s )\n\n", cfg.source_lang.c_str(), cfg.target_lang.c_str() };
+		fmt{ fmt_def, fc_cyan, "      Run in background mode ( %s > %s )\n\n", g::cfg.source_lang.c_str(), g::cfg.target_lang.c_str() };
 
 		fmt{ fmt_def, fc_none, "lswap run --log\n" };
 		fmt{ fmt_def, fc_cyan, "      Run in background mode with logging\n\n" };
@@ -27,8 +27,7 @@ int main(int argc, const char** argv)
 	} };
 
 	cli.add("run", [&](int ac, args_t args) {
-		g::cfg = g_config.init();
-		g_hooks.init();
+		hooks::init();
 
 		if (ac == 1 && args[1] == "--log")
 			g::m_log = true;
@@ -40,7 +39,7 @@ int main(int argc, const char** argv)
 		if (g::m_log)
 			fmt{ fmt_def, fc_yellow, "Warning: Running in logging mode\n\n" };
 
-		fmt{ fmt_def, fc_cyan, "  %s > %s\n\n", cfg.source_lang.c_str(), cfg.target_lang.c_str() };
+		fmt{ fmt_def, fc_cyan, "  %s > %s\n\n", g::cfg.source_lang.c_str(), g::cfg.target_lang.c_str() };
 
 		fmt{ fmt_def, fc_none, "Stay tuned for updates https://github.com/xastrix/lswap\n" };
 
@@ -50,7 +49,7 @@ int main(int argc, const char** argv)
 			DispatchMessage(&msg);
 		}
 
-		g_hooks.free();
+		hooks::free();
 	});
 
 	return cli.parse(argc, argv);

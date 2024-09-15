@@ -1,12 +1,9 @@
 #include "hooks.h"
-
 #include "../globals.h"
 #include "../fmt/fmt.h"
 #include "../utils/utils.h"
 
 #include <curl/curl.h>
-
-hooks g_hooks;
 
 HHOOK h = NULL;
 HWND  hwnd = NULL;

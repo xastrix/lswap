@@ -10,8 +10,7 @@ struct cfg_t {
 	std::string target_lang;
 };
 
-struct config {
+namespace config
+{
 	cfg_t init();
-};
-
-extern config g_config;
+}

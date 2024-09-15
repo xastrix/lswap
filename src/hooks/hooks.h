@@ -1,8 +1,7 @@
 #pragma once
 
-struct hooks {
+namespace hooks
+{
 	void init();
 	void free();
-};
-
-extern hooks g_hooks;
+}
