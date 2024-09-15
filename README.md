@@ -24,6 +24,7 @@ After building, run ```lswap.sln``` (Visual Studio Solution File) and compile pr
 ### Requirements
 * Visual Studio
 * Windows SDK
+* [premake5](https://github.com/premake/premake-core/releases)
 ## Dependencies
 [curl](https://github.com/curl/curl)  
 ## License
