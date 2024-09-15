@@ -19,7 +19,8 @@ Clone the repository
 ```c
  git clone https://github.com/xastrix/lswap.git
 ```
-Run ```lswap.sln``` (Visual Studio Solution File) and compile in Release\x86
+Launch ```build-vsXX.bat``` (Where XX is the version of your VS).  
+After building, run ```lswap.sln``` (Visual Studio Solution File) and compile project by pressing ```CTRL + Shift + B```
 ### Requirements
 * Visual Studio
 * Windows SDK
