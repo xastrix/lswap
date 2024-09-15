@@ -21,8 +21,10 @@ int main(int argc, const char** argv)
 		fmt{ fmt_def, fc_none, "lswap run --log\n" };
 		fmt{ fmt_def, fc_cyan, "      Run in background mode with logging\n\n" };
 
-		fmt{ fmt_def, fc_none, "Stay tuned for updates https://github.com/xastrix/lswap\n" };
-		fmt{ fmt_def, fc_none, "Copyright (c) 2024 xastrix" };
+		fmt{ fmt_def, fc_none, "lswap config <source_lang> <target_lang>\n" };
+		fmt{ fmt_def, fc_cyan, "      Change the source and target languages in the configuration file\n\n" };
+
+		fmt{ fmt_def, fc_none, "Stay tuned for updates https://github.com/xastrix/lswap" };
 	} };
 
 	cli.add("run", [&](int ac, args_t args) {
@@ -49,6 +51,24 @@ int main(int argc, const char** argv)
 		}
 
 		hooks::free();
+	});
+
+	cli.add("config", [&](int ac, args_t args) {
+		switch (ac) {
+		case 0: {
+			fmt{ fmt_30ms, fc_none, "Source & Target language is empty" };
+			break;
+		}
+		case 1: {
+			fmt{ fmt_30ms, fc_none, "Target language is empty" };
+			break;
+		}
+		case 2: {
+			config::change_cfg_values(args[1], args[2]);
+			fmt{ fmt_30ms, fc_none, "Parameters in the configuration file is updated!" };
+			break;
+		}
+		}
 	});
 
 	return cli.parse(argc, argv);

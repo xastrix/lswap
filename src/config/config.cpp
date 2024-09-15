@@ -64,3 +64,18 @@ cfg_t config::init()
 
 	return cfg;
 }
+
+void config::change_cfg_values(const std::string& source_lang, const std::string& target_lang)
+{
+	std::string user_directory = getenv("USERPROFILE");
+	std::string path = user_directory + "\\" + LSWAP_CONFIGURATION_FILENAME;
+
+	FILE* f = fopen(path.c_str(), "w");
+
+	if (f) {
+		fprintf(f, "source_lang=%s\n", source_lang.c_str());
+		fprintf(f, "target_lang=%s", target_lang.c_str());
+	}
+
+	fclose(f);
+}
