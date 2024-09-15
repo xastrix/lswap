@@ -13,6 +13,28 @@ cfg_t config::init()
 	std::string user_directory = getenv("USERPROFILE");
 	std::string path = user_directory + "\\" + LSWAP_CONFIGURATION_FILENAME;
 
+	cfg.source_lang = "ru";
+	cfg.target_lang = "en";
+
+	auto exists = [](const char* path) {
+		struct stat s;
+		if (stat(path, &s) == 0) {
+			if (s.st_mode & S_IFREG) {
+				return true;
+			}
+		}
+		return false;
+	};
+
+	if (!exists(path.c_str())) {
+		FILE* f = fopen(path.c_str(), "w");
+		if (f) {
+			fprintf(f, "source_lang=ru\n");
+			fprintf(f, "target_lang=en");
+		}
+		fclose(f);
+	}
+
 	std::ifstream f(path);
 
 	if (!f.is_open()) {
@@ -29,10 +51,6 @@ cfg_t config::init()
 	f.close();
 
 	std::stringstream ss(content);
-
-	cfg.source_lang = "?";
-	cfg.target_lang = "?";
-
 	while (std::getline(ss, line)) {
 		if (line.empty() || line[0] == '#') {
 			continue;

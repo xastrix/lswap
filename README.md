@@ -4,7 +4,7 @@ This is a command line tool for fast translating language to language by copying
 ![Showcase](https://github.com/xastrix/lswap/blob/master/media/showcase.gif)
 ## Compiling
 Clone the repository ```git clone https://github.com/xastrix/lswap.git``` and open **lswap.sln**
-### Reqirements
+### Requirements
 * Visual Studio
 * Windows SDK
 ## Dependencies
