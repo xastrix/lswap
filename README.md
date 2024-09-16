@@ -1,13 +1,11 @@
 # lswap
 This is a command line tool for fast translating language to language by copying and pasting data to the clipboard.
 ```
-Arguments:
-
-lswap run
-      Run in background mode
-
 lswap run --log
-      Run in background mode with logging
+      With logging (Displaying nontranslated and translated texts)
+
+lswap run --hidden
+      With hidden console window (But you can only terminate the program by closing the process)
 
 lswap config <source_lang> <target_lang>
       Change the source and target languages in the configuration file

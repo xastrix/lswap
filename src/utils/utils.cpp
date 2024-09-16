@@ -1,28 +1,33 @@
 #include "utils.h"
 
+#include <locale>
 #include <unordered_map>
 #include <codecvt>
 
-std::string utils::replace_characters(const std::string& str, const std::string& chars_to_replace, const std::string& replacements)
+void utils::set_locale()
 {
-	std::unordered_map<char, std::string> replacement_map;
+	setlocale(LC_ALL, "");
+}
 
-	for (size_t i = 0; i < chars_to_replace.size(); ++i) {
-		replacement_map[chars_to_replace[i]] = replacements;
+std::wstring utils::remove_chars(const std::wstring& str, const std::wstring& chars)
+{
+	std::vector<wchar_t> chars_to_remove;
+	for (size_t i = 0; i < chars.length(); ++i)
+	{
+		chars_to_remove.push_back(chars[i]);
 	}
 
-	std::string result;
+	std::wstring mod;
 
-	for (char c : str) {
-		if (replacement_map.find(c) != replacement_map.end()) {
-			result += replacement_map[c];
-		}
-		else {
-			result += c;
+	for (size_t i = 0; i < str.length(); ++i)
+	{
+		if (std::find(chars_to_remove.begin(), chars_to_remove.end(), str[i]) == chars_to_remove.end())
+		{
+			mod += str[i];
 		}
 	}
 
-	return result;
+	return mod;
 }
 
 std::wstring utils::get_current_clipboard(HWND hwnd)

@@ -3,9 +3,12 @@
 #include <windows.h>
 #include <string>
 
+#define FORBIDDEN_CHARS L"@#$%^&*\"\\/:<>(){}"
+
 namespace utils
 {
-	std::string replace_characters(const std::string& str, const std::string& chars_to_replace, const std::string& replacements);
+	void set_locale();
+	std::wstring remove_chars(const std::wstring& str, const std::wstring& chars);
 	std::wstring get_current_clipboard(HWND hwnd);
 	void put_in_clipboard(HWND hwnd, const std::wstring& data);
 	std::wstring parse_json(const std::wstring& json);

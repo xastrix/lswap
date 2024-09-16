@@ -3,35 +3,13 @@
 #include <fstream>
 #include <sstream>
 #include <cstring>
+#include <filesystem>
 
-cfg_t config::init()
+std::string path;
+
+static cfg_t read_values()
 {
 	cfg_t cfg;
-
-	std::string user_directory = getenv("USERPROFILE");
-	std::string path = user_directory + "\\" + LSWAP_CONFIGURATION_FILENAME;
-
-	cfg.source_lang = "ru";
-	cfg.target_lang = "en";
-
-	auto exists = [](const char* path) {
-		struct stat s;
-		if (stat(path, &s) == 0) {
-			if (s.st_mode & S_IFREG) {
-				return true;
-			}
-		}
-		return false;
-	};
-
-	if (!exists(path.c_str())) {
-		FILE* f = fopen(path.c_str(), "w");
-		if (f) {
-			fprintf(f, "source_lang=ru\n");
-			fprintf(f, "target_lang=en");
-		}
-		fclose(f);
-	}
 
 	std::ifstream f(path);
 
@@ -65,17 +43,40 @@ cfg_t config::init()
 	return cfg;
 }
 
-void config::change_cfg_values(const std::string& source_lang, const std::string& target_lang)
+static bool set_config_values(const std::string& source_lang, const std::string& target_lang)
 {
-	std::string user_directory = getenv("USERPROFILE");
-	std::string path = user_directory + "\\" + LSWAP_CONFIGURATION_FILENAME;
+	std::ofstream f(path);
 
-	FILE* f = fopen(path.c_str(), "w");
+	if (!f.is_open())
+		return false;
 
-	if (f) {
-		fprintf(f, "source_lang=%s\n", source_lang.c_str());
-		fprintf(f, "target_lang=%s", target_lang.c_str());
-	}
+	f << "# lswap configuration file\n\n";
+	f << "source_lang=" << source_lang << "\n";
+	f << "target_lang=" << target_lang;
+	
+	f.close();
 
-	fclose(f);
+	return true;
+}
+
+cfg_t config::init()
+{
+	cfg_t cfg;
+
+	path = std::string(getenv("USERPROFILE")) + "\\" LSWAP_CONFIGURATION_FILENAME;
+
+	cfg.source_lang = "ru";
+	cfg.target_lang = "en";
+
+	if (!std::filesystem::exists(path))
+		set_config_values(cfg.source_lang, cfg.target_lang);
+
+	cfg = read_values();
+
+	return cfg;
+}
+
+bool config::change_cfg_values(const std::string& source_lang, const std::string& target_lang)
+{
+	return set_config_values(source_lang, target_lang);
 }
