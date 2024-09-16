@@ -14,7 +14,7 @@ project (global)
 
 	files { "src/**" }
 
-	externalincludedirs { "curl" }
+	externalincludedirs { "curl/curl/include" }
 	syslibdirs { "curl/lib" }
 
 	defines { "_CRT_SECURE_NO_WARNINGS", "CURL_STATICLIB" }
