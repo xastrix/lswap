@@ -64,28 +64,31 @@ static long __stdcall win_proc_h(HWND h, UINT m, WPARAM w, LPARAM l)
 
 			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 			curl_easy_setopt(curl, CURLOPT_USERAGENT, "lswap/" LSWAP_VERSION_STRING);
-			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, utils::wc);
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, utils::write_callback);
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
 			curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
 
 			res = curl_easy_perform(curl);
 
-			std::wstring translated = utils::parse_json(buffer);
-
-			if (g::m_log)
+			if (res == CURLE_OK)
 			{
-				fmt{ fmt_def, fc_cyan, "[Log] " };
-				fmt{ fmt_def, fc_none, "<Url> %s\n", url.c_str() };
+				std::wstring translated = utils::parse_json(buffer);
 
-				fmt{ fmt_def, fc_cyan, "[Log] " };
-				wfmt{ fmt_def, fc_none, L"<NonTranslated> %ls\n", utils::get_current_clipboard(hwnd).c_str() };
+				if (g::m_log)
+				{
+					fmt{ fmt_def, fc_cyan, "[Log] " };
+					fmt{ fmt_def, fc_none, "<Url> %s\n", url.c_str() };
 
-				fmt{ fmt_def, fc_cyan, "[Log] " };
-				wfmt{ fmt_def, fc_none, L"<Translated> %ls\n", translated.c_str() };
+					fmt{ fmt_def, fc_cyan, "[Log] " };
+					wfmt{ fmt_def, fc_none, L"<NonTranslated> %ls\n", utils::get_current_clipboard(hwnd).c_str() };
+
+					fmt{ fmt_def, fc_cyan, "[Log] " };
+					wfmt{ fmt_def, fc_none, L"<Translated> %ls\n", translated.c_str() };
+				}
+
+				utils::put_in_clipboard(hwnd, translated);
+				m_processing = 1;
 			}
-
-			utils::put_in_clipboard(hwnd, translated);
-			m_processing = 1;
 		}
 
 		curl_global_cleanup();

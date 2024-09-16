@@ -64,8 +64,12 @@ int main(int argc, const char** argv)
 			break;
 		}
 		case 2: {
-			config::change_cfg_values(args[1], args[2]);
-			fmt{ fmt_30ms, fc_none, "Parameters in the configuration file is updated!" };
+			if (args[1].size() < 4 && args[2].size() < 4) {
+				config::change_cfg_values(args[1], args[2]);
+				fmt{ fmt_30ms, fc_none, "Parameters in the configuration file is updated!" };
+				return;
+			}
+			fmt{ fmt_30ms, fc_none, "Invalid language codes" };
 			break;
 		}
 		}

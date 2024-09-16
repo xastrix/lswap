@@ -3,12 +3,6 @@
 #include <unordered_map>
 #include <codecvt>
 
-static char hex_char(unsigned int v)
-{
-	if (v < 10) return v + '0';
-	return v - 10 + 'A';
-}
-
 std::string utils::replace_characters(const std::string& str, const std::string& chars_to_replace, const std::string& replacements)
 {
 	std::unordered_map<char, std::string> replacement_map;
@@ -18,6 +12,7 @@ std::string utils::replace_characters(const std::string& str, const std::string&
 	}
 
 	std::string result;
+
 	for (char c : str) {
 		if (replacement_map.find(c) != replacement_map.end()) {
 			result += replacement_map[c];
@@ -87,9 +82,10 @@ void utils::put_in_clipboard(HWND hwnd, const std::wstring& data)
 
 std::wstring utils::parse_json(const std::wstring& json)
 {
-	std::wstring result;
 	size_t start = json.find(L"\"");
 	size_t end = json.find(L"\"", start + 1);
+
+	std::wstring result;
 
 	if (start != std::wstring::npos && end != std::wstring::npos) {
 		result = json.substr(start + 1, end - start - 1);
@@ -98,17 +94,18 @@ std::wstring utils::parse_json(const std::wstring& json)
 	return result;
 }
 
-size_t utils::wc(void* contents, size_t size, size_t nmemb, void* userp)
+size_t utils::write_callback(void* contents, size_t size, size_t nmemb, void* userp)
 {
-	std::wstring* mem = (std::wstring*)userp;
 	size_t rlsize = size * nmemb;
 	char* wcontents = new char[rlsize];
 	std::memcpy(wcontents, contents, rlsize);
 
 	std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
 	std::wstring w_mem = converter.from_bytes(std::string(wcontents, wcontents + rlsize));
+
 	delete[] wcontents;
 
+	std::wstring* mem = (std::wstring*)userp;
 	mem->append(w_mem.begin(), w_mem.end());
 
 	return rlsize;
