@@ -3,7 +3,7 @@
 #include <windows.h>
 #include <string>
 
-#define FORBIDDEN_CHARS L"@#$%^&*\"\\/:<>(){}"
+#define FORBIDDEN_CHARS L"@#$%^&*\"\\/:\r\n<>(){}"
 
 namespace utils
 {
