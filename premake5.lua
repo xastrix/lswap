@@ -18,7 +18,7 @@ project (global)
 	syslibdirs { "curl/lib" }
 
 	defines { "_CRT_SECURE_NO_WARNINGS", "CURL_STATICLIB" }
-	links { "curl.lib" }
+	links { "libcurl.lib" }
 
 	buildoptions { "/std:c++latest" }
 
