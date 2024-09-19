@@ -2,8 +2,41 @@
 
 #include <curl/curl.h>
 
-HWND hwnd = NULL;
-int  m_processing = 0;
+HHOOK m_h = NULL;
+HWND  m_hwnd = NULL;
+int   m_processing = 0;
+int   m_processing_press = 0;
+bool  m_hidden = false;
+
+static long __stdcall keyboard_proc_h(int c, WPARAM w, LPARAM l)
+{
+	switch (c) {
+	case HC_ACTION: {
+
+		if ((GetAsyncKeyState(VK_CONTROL) & 0x8000))
+		{
+			KBDLLHOOKSTRUCT* k = (KBDLLHOOKSTRUCT*)l;
+
+			if (k->vkCode == 'X')
+			{
+				if (m_processing_press == 1) {
+					m_processing_press = 0;
+					break;
+				}
+
+				ShowWindow(GetConsoleWindow(), m_hidden ? SW_SHOW : SW_HIDE);
+				m_hidden =! m_hidden;
+
+				m_processing_press = 1;
+			}
+		}
+
+		break;
+	}
+	}
+
+	return CallNextHookEx(m_h, c, w, l);
+}
 
 static long __stdcall win_proc_h(HWND h, UINT m, WPARAM w, LPARAM l)
 {
@@ -27,7 +60,7 @@ static long __stdcall win_proc_h(HWND h, UINT m, WPARAM w, LPARAM l)
 			url += "tl=" + g::cfg.target_lang + "&";
 			url += "dt=t&q=";
 
-			std::wstring clipboard = utils::remove_chars(utils::get_current_clipboard(hwnd), FORBIDDEN_CHARS);
+			std::wstring clipboard = utils::remove_chars(utils::get_current_clipboard(m_hwnd), FORBIDDEN_CHARS);
 
 			char* esc = curl_easy_escape(curl, utils::to_utf8(clipboard).c_str(), 0);
 			if (esc) {
@@ -49,17 +82,20 @@ static long __stdcall win_proc_h(HWND h, UINT m, WPARAM w, LPARAM l)
 			{
 				std::wstring text = utils::parse_json(buffer);
 
-				if (g::m_log)
+				if (!text.empty())
 				{
-					fmt{ fmt_def, fc_cyan, "LOG: " };
-					wfmt{ fmt_def, fc_none, L"<NonTranslated> %ls\n", clipboard.c_str() };
+					if (g::m_log)
+					{
+						fmt{ fmt_def, fc_cyan, "LOG: " };
+						wfmt{ fmt_def, fc_none, L"<NonTranslated> %ls\n", clipboard.c_str() };
 
-					fmt{ fmt_def, fc_cyan, "LOG: " };
-					wfmt{ fmt_def, fc_none, L"<Translated> %ls\n", text.c_str() };
+						fmt{ fmt_def, fc_cyan, "LOG: " };
+						wfmt{ fmt_def, fc_none, L"<Translated> %ls\n", text.c_str() };
+					}
+
+					utils::put_in_clipboard(m_hwnd, text);
+					m_processing = 1;
 				}
-
-				utils::put_in_clipboard(hwnd, text);
-				m_processing = 1;
 			}
 		}
 
@@ -68,7 +104,7 @@ static long __stdcall win_proc_h(HWND h, UINT m, WPARAM w, LPARAM l)
 		return 0;
 	}
 	case WM_DESTROY: {
-		RemoveClipboardFormatListener(hwnd);
+		RemoveClipboardFormatListener(m_hwnd);
 		PostQuitMessage(0);
 
 		return 0;
@@ -87,15 +123,22 @@ void hooks::init()
 
 	RegisterClass(&wc);
 
-	hwnd = CreateWindowEx(0, wc.lpszClassName, "lswap", 0, 0, 0, 0, 0, NULL, NULL, wc.hInstance, NULL);
-	AddClipboardFormatListener(hwnd);
+	m_hwnd = CreateWindowEx(0, wc.lpszClassName, "lswap", 0, 0, 0, 0, 0, NULL, NULL, wc.hInstance, NULL);
+	m_h = SetWindowsHookEx(WH_KEYBOARD_LL, keyboard_proc_h, NULL, 0);
+
+	AddClipboardFormatListener(m_hwnd);
 }
 
 void hooks::free()
 {
-	if (hwnd != NULL) {
-		RemoveClipboardFormatListener(hwnd);
+	if (m_h != NULL) {
+		UnhookWindowsHookEx(m_h);
+		m_h = NULL;
+	}
+
+	if (m_hwnd != NULL) {
+		RemoveClipboardFormatListener(m_hwnd);
 		UnregisterClass("lswap001", GetModuleHandle(NULL));
-		hwnd = NULL;
+		m_hwnd = NULL;
 	}
 }

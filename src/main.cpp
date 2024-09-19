@@ -10,36 +10,31 @@ int main(int argc, const char** argv)
 		fmt{ fmt_30ms, fc_none, "lswap is an fast translator of your text from the clipboard" };
 		fmt{ fmt_30ms, fc_none, "lswap version %s\n", LSWAP_VERSION_STRING };
 
-		fmt{ fmt_def, fc_none, "target language - %s\n", g::cfg.target_lang.c_str() };
-		fmt{ fmt_def, fc_none, "source language - %s\n\n", g::cfg.source_lang.c_str() };
+		fmt{ fmt_def, fc_cyan, "  %s > %s\n\n", g::cfg.source_lang.c_str(), g::cfg.target_lang.c_str() };
 
 		fmt{ fmt_def, fc_none, "lswap run --log\n" };
 		fmt{ fmt_def, fc_cyan, "      With logging (Displaying nontranslated and translated texts)\n\n" };
-
-		fmt{ fmt_def, fc_none, "lswap run --hidden\n" };
-		fmt{ fmt_def, fc_cyan, "      With hidden console window (But you can only terminate the program by closing the process)\n\n" };
 
 		fmt{ fmt_def, fc_none, "lswap config <source_lang> <target_lang>\n" };
 		fmt{ fmt_def, fc_cyan, "      Change the source and target languages in the configuration file\n\n\n" };
 
 		fmt{ fmt_def, fc_none, "Stay tuned for updates\n" };
-		fmt{ fmt_def, fc_cyan, "      https://github.com/xastrix/lswap" };
+		fmt{ fmt_def, fc_cyan, "      https://github.com/xastrix/lswap\n" };
 	} };
 
 	cli.add("run", [&](int ac, args_t args) {
 		if (ac == 1 && args[1] == "--log")
 			g::m_log = true;
 
-		else if (ac == 1 && args[1] == "--hidden")
-			ShowWindow(GetConsoleWindow(), SW_HIDE);
+		fmt{ fmt_def, fc_none, "\n" };
+		fmt{ fmt_def, fc_cyan, "  %s > %s\n\n", g::cfg.source_lang.c_str(), g::cfg.target_lang.c_str() };
 
 		fmt{ fmt_30ms, fc_yellow, "Hint: Highlight your text (CTRL + C) and paste (CTRL + V)" };
-		fmt{ fmt_30ms, fc_yellow, "Hint2: To close the program focus on window and press CTRL + C\n" };
+		fmt{ fmt_30ms, fc_yellow, "Hint2: To close the program focus on window and press CTRL + C" };
+		fmt{ fmt_30ms, fc_yellow, "Hint3: You can hide the console window by pressing CTRL + X\n" };
 
 		if (g::m_log)
-			fmt{ fmt_def, fc_yellow, "Warning: Running in logging mode\n\n" };
-
-		fmt{ fmt_def, fc_cyan, "  %s > %s\n\n", g::cfg.source_lang.c_str(), g::cfg.target_lang.c_str() };
+			fmt{ fmt_def, fc_yellow, "Warning: Running in logging mode\n" };
 
 		hooks::init();
 

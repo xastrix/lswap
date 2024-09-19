@@ -63,7 +63,8 @@ cfg_t config::init()
 {
 	cfg_t cfg;
 
-	path = std::string(getenv("USERPROFILE")) + "\\" LSWAP_CONFIGURATION_FILENAME;
+	std::string user_directory = getenv("USERPROFILE");
+	path = user_directory + "\\" LSWAP_CONFIGURATION_FILENAME;
 
 	cfg.source_lang = "ru";
 	cfg.target_lang = "en";

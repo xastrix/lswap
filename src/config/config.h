@@ -2,7 +2,7 @@
 
 #include <string>
 
-#define LSWAP_VERSION_STRING         "v1.3.windows"
+#define LSWAP_VERSION_STRING         "v1.4.windows"
 #define LSWAP_CONFIGURATION_FILENAME ".lswapconf"
 
 struct cfg_t {
