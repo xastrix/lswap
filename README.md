@@ -1,4 +1,4 @@
-# lswap
+[Logo](https://github.com/xastrix/lswap/blob/master/media/logo.png)  
 This is a command line tool for fast translating language to language by copying and pasting data to the clipboard.
 ```
 lswap run --log
