@@ -1,5 +1,9 @@
 .vs/
 
 bin/
-
 obj/
+
+lswap.sln
+src/lswap.vcxproj
+src/lswap.vcxproj.filters
+src/lswap.vcxproj.user
