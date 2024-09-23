@@ -1,5 +1,5 @@
 ![Logo](https://github.com/xastrix/lswap/blob/master/media/logo.png)  
-This is a command line tool for fast translating language to language by copying and pasting data to the clipboard.
+This is a command line tool designed for swift translation between languages by simply copying and pasting data from the clipboard
 ```
 lswap run --log
       With logging (Displaying nontranslated and translated texts)

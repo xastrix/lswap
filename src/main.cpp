@@ -6,25 +6,24 @@ int main(int argc, const char** argv)
 	utils::set_locale();
 	g::cfg = config::init();
 
-	cli cli{ [&]() {
-		fmt{ fmt_30ms, fc_none, "lswap is an fast translator of your text from the clipboard" };
-		fmt{ fmt_30ms, fc_none, "lswap version %s\n", LSWAP_VERSION_STRING };
+	cli cli{ []() {
+		fmt{ fmt_30ms, fc_none, "%s is a command line tool designed for swift translation between languages by simply copying and pasting data from the clipboard", LSWAP_APPLICATION_NAME };
+		fmt{ fmt_30ms, fc_none, "%s version %s\n", LSWAP_APPLICATION_NAME, LSWAP_VERSION_STRING };
 
 		fmt{ fmt_def, fc_cyan, "  %s > %s\n\n", g::cfg.source_lang.c_str(), g::cfg.target_lang.c_str() };
 
-		fmt{ fmt_def, fc_none, "lswap run --log\n" };
+		fmt{ fmt_def, fc_none, "%s run --log\n", LSWAP_APPLICATION_NAME };
 		fmt{ fmt_def, fc_cyan, "      With logging (Displaying nontranslated and translated texts)\n\n" };
 
-		fmt{ fmt_def, fc_none, "lswap config <source_lang> <target_lang>\n" };
-		fmt{ fmt_def, fc_cyan, "      Change the source and target languages in the configuration file\n\n\n" };
-
-		fmt{ fmt_def, fc_none, "Stay tuned for updates\n" };
-		fmt{ fmt_def, fc_cyan, "      https://github.com/xastrix/lswap\n" };
+		fmt{ fmt_def, fc_none, "%s config <source_lang> <target_lang>\n", LSWAP_APPLICATION_NAME };
+		fmt{ fmt_def, fc_cyan, "      Change the source and target languages in the configuration file\n\n" };
 	} };
 
-	cli.add("run", [&](int ac, args_t args) {
+	cli.add("run", [](int ac, args_t args) {
 		if (ac == 1 && args[1] == "--log")
 			g::m_log = true;
+
+		hooks::init();
 
 		fmt{ fmt_def, fc_none, "\n" };
 		fmt{ fmt_def, fc_cyan, "  %s > %s\n\n", g::cfg.source_lang.c_str(), g::cfg.target_lang.c_str() };
@@ -36,8 +35,6 @@ int main(int argc, const char** argv)
 		if (g::m_log)
 			fmt{ fmt_def, fc_yellow, "Warning: Running in logging mode\n" };
 
-		hooks::init();
-
 		MSG msg;
 		while (GetMessage(&msg, NULL, 0, 0)) {
 			TranslateMessage(&msg);
@@ -47,7 +44,7 @@ int main(int argc, const char** argv)
 		hooks::free();
 	});
 
-	cli.add("config", [&](int ac, args_t args) {
+	cli.add("config", [](int ac, args_t args) {
 		switch (ac) {
 		case 0: {
 			fmt{ fmt_30ms, fc_none, "Source & Target languages is empty" };
@@ -61,7 +58,7 @@ int main(int argc, const char** argv)
 			if (config::change_cfg_values(args[1], args[2])) {
 				fmt{ fmt_30ms, fc_none, "Parameters in the configuration file is updated!" };
 
-				g::cfg = config::init();
+				g::cfg = config::init(); // Reload configuration
 				fmt{ fmt_def, fc_none, "Updated: %s > %s\n", g::cfg.source_lang.c_str(), g::cfg.target_lang.c_str() };
 			}
 			break;

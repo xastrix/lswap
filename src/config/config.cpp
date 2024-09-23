@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <sstream>
-#include <cstring>
 #include <filesystem>
 
 std::string path;

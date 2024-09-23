@@ -4,33 +4,40 @@
 
 HHOOK m_h = NULL;
 HWND  m_hwnd = NULL;
-int   m_processing = 0;
-int   m_processing_press = 0;
-bool  m_hidden = false;
+bool  m_hold_proc = false;
+bool  m_hold_key_press = false;
+
+static void curl_escape_url(CURL* curl, const std::wstring& in, std::string& url)
+{
+	char* esc = curl_easy_escape(curl, utils::to_utf8(in).c_str(), 0);
+
+	if (esc) {
+		url += esc;
+		curl_free(esc);
+	}
+}
 
 static long __stdcall keyboard_proc_h(int c, WPARAM w, LPARAM l)
 {
 	switch (c) {
 	case HC_ACTION: {
-
-		if ((GetAsyncKeyState(VK_CONTROL) & 0x8000))
-		{
+		if ((GetAsyncKeyState(VK_CONTROL) & 0x8000)) {
 			KBDLLHOOKSTRUCT* k = (KBDLLHOOKSTRUCT*)l;
 
-			if (k->vkCode == 'X')
-			{
-				if (m_processing_press == 1) {
-					m_processing_press = 0;
+			if (k->vkCode == 'X') {
+				static bool h = false;
+
+				if (m_hold_key_press) {
+					m_hold_key_press = false;
 					break;
 				}
 
-				ShowWindow(GetConsoleWindow(), m_hidden ? SW_SHOW : SW_HIDE);
-				m_hidden =! m_hidden;
-
-				m_processing_press = 1;
+				ShowWindow(GetConsoleWindow(), h ? SW_SHOW : SW_HIDE);
+				
+				h = !h;
+				m_hold_key_press = true;
 			}
 		}
-
 		break;
 	}
 	}
@@ -42,36 +49,27 @@ static long __stdcall win_proc_h(HWND h, UINT m, WPARAM w, LPARAM l)
 {
 	switch (m) {
 	case WM_CLIPBOARDUPDATE: {
-		CURL*    curl;
-		CURLcode res;
-
-		if (m_processing == 1) {
-			m_processing = 0;
-			return 0;
+		if (m_hold_proc) {
+			m_hold_proc = false;
+			break;
 		}
-
-		curl = curl_easy_init();
+	
+		CURL* curl = curl_easy_init();
+		CURLcode res;
 
 		if (curl)
 		{
-			std::string url = "https://translate.googleapis.com/translate_a/single?client=gtx&";
-
-			url += "sl=" + g::cfg.source_lang + "&";
-			url += "tl=" + g::cfg.target_lang + "&";
-			url += "dt=t&q=";
-
-			std::wstring clipboard = utils::remove_chars(utils::get_current_clipboard(m_hwnd), FORBIDDEN_CHARS);
-
-			char* esc = curl_easy_escape(curl, utils::to_utf8(clipboard).c_str(), 0);
-			if (esc) {
-				url += esc;
-				curl_free(esc);
-			}
-
 			std::wstring buffer;
+			std::wstring clipboard = utils::remove_chars(utils::get_current_clipboard(m_hwnd), FORBIDDEN_CHARS);
+			
+			std::string url;
+			curl_escape_url(curl, clipboard, url = std::string {
+				"https://translate.googleapis.com/translate_a/single?client=gtx&sl=" +
+				g::cfg.source_lang + "&tl=" + g::cfg.target_lang + "&dt=t&q="
+			});
 
 			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-			curl_easy_setopt(curl, CURLOPT_USERAGENT, "lswap/" LSWAP_VERSION_STRING);
+			curl_easy_setopt(curl, CURLOPT_USERAGENT, LSWAP_APPLICATION_NAME "/" LSWAP_VERSION_STRING);
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, utils::write_callback);
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
 			curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
@@ -94,20 +92,18 @@ static long __stdcall win_proc_h(HWND h, UINT m, WPARAM w, LPARAM l)
 					}
 
 					utils::put_in_clipboard(m_hwnd, text);
-					m_processing = 1;
+					m_hold_proc = true;
 				}
 			}
 		}
 
 		curl_global_cleanup();
-
-		return 0;
+		break;
 	}
 	case WM_DESTROY: {
 		RemoveClipboardFormatListener(m_hwnd);
 		PostQuitMessage(0);
-
-		return 0;
+		break;
 	}
 	}
 
@@ -119,14 +115,28 @@ void hooks::init()
 	WNDCLASS wc = { 0 };
 	wc.lpfnWndProc = win_proc_h;
 	wc.hInstance = GetModuleHandle(NULL);
-	wc.lpszClassName = "lswap001";
+	wc.lpszClassName = LSWAP_APPLICATION_CLASS_NAME;
 
 	RegisterClass(&wc);
 
-	m_hwnd = CreateWindowEx(0, wc.lpszClassName, "lswap", 0, 0, 0, 0, 0, NULL, NULL, wc.hInstance, NULL);
+	m_hwnd = CreateWindowEx(0, wc.lpszClassName, LSWAP_APPLICATION_NAME, 0, 0, 0, 0, 0, NULL, NULL, wc.hInstance, NULL);
+
+	if (m_hwnd == NULL) {
+		free();
+		fmt{ fmt_def, fc_red, "fatal: CreateWindowEx() == NULL\n" }.die();
+	}
+
 	m_h = SetWindowsHookEx(WH_KEYBOARD_LL, keyboard_proc_h, NULL, 0);
 
-	AddClipboardFormatListener(m_hwnd);
+	if (m_h == NULL) {
+		free();
+		fmt{ fmt_def, fc_red, "fatal: SetWindowsHookEx() == NULL\n" }.die();
+	}
+
+	if (AddClipboardFormatListener(m_hwnd) == FALSE) {
+		free();
+		fmt{ fmt_def, fc_red, "fatal: A function AddClipboardFormatListener() == FALSE\n" }.die();
+	}
 }
 
 void hooks::free()
@@ -138,7 +148,7 @@ void hooks::free()
 
 	if (m_hwnd != NULL) {
 		RemoveClipboardFormatListener(m_hwnd);
-		UnregisterClass("lswap001", GetModuleHandle(NULL));
+		UnregisterClass(LSWAP_APPLICATION_CLASS_NAME, GetModuleHandle(NULL));
 		m_hwnd = NULL;
 	}
 }

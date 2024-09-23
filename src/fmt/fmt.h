@@ -24,6 +24,7 @@ enum fmt_mode {
 
 struct fmt {
 	fmt(fmt_mode mode, fmt_col col, const char* fmt, ...);
+	void die() { exit(EXIT_FAILURE); }
 };
 
 struct wfmt {
