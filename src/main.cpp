@@ -20,6 +20,13 @@ int main(int argc, const char** argv)
 	} };
 
 	cli.add("run", [](int ac, args_t args) {
+		HANDLE mutex = CreateMutex(NULL, FALSE, LSWAP_MUTEX_NAME);
+
+		if (GetLastError() == ERROR_ALREADY_EXISTS) {
+			CloseHandle(mutex);
+			fmt{ fmt_30ms, fc_red, "fatal: %s is already running", LSWAP_APPLICATION_NAME }.die();
+		}
+
 		if (ac == 1 && args[1] == "--log")
 			g::m_log = true;
 
@@ -42,6 +49,9 @@ int main(int argc, const char** argv)
 		}
 
 		hooks::free();
+
+		ReleaseMutex(mutex);
+		CloseHandle(mutex);
 	});
 
 	cli.add("config", [](int ac, args_t args) {
