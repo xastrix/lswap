@@ -1,10 +1,11 @@
 #include "config.h"
+#include "../common.h"
 
 #include <fstream>
 #include <sstream>
 #include <filesystem>
 
-std::string path;
+static std::string path;
 
 static cfg_t read_values()
 {
@@ -16,9 +17,7 @@ static cfg_t read_values()
 		return cfg;
 	}
 
-	std::string content;
-
-	std::string line;
+	std::string line, content;
 	while (std::getline(f, line)) {
 		content += line + "\n";
 	}
@@ -31,11 +30,23 @@ static cfg_t read_values()
 			continue;
 		}
 
-		if (line.rfind("source_lang=", 0) == 0) {
-			cfg.source_lang = line.substr(12);
+		size_t equal_pos = line.find('=');
+
+		if (equal_pos == std::string::npos) {
+			continue;
 		}
-		else if (line.rfind("target_lang=", 0) == 0) {
-			cfg.target_lang = line.substr(12);
+
+		std::string key = line.substr(0, equal_pos);
+		std::string value = line.substr(equal_pos + 1);
+
+		value = value.substr(1, value.length() - 2);
+
+		if (key == "source_lang") {
+			cfg.source_lang = value;
+		}
+
+		else if (key == "target_lang") {
+			cfg.target_lang = value;
 		}
 	}
 
@@ -49,9 +60,10 @@ static bool set_config_values(const std::string& source_lang, const std::string&
 	if (!f.is_open())
 		return false;
 
-	f << "# lswap configuration file\n\n";
-	f << "source_lang=" << source_lang << "\n";
-	f << "target_lang=" << target_lang;
+	f << "# lswap version " LSWAP_VERSION_STRING "\n";
+	f << "# the configuration file\n\n";
+	f << "source_lang=\"" << source_lang << "\"\n";
+	f << "target_lang=\"" << target_lang << "\"";
 	
 	f.close();
 
@@ -71,9 +83,7 @@ cfg_t config::init()
 	if (!std::filesystem::exists(path))
 		set_config_values(cfg.source_lang, cfg.target_lang);
 
-	cfg = read_values();
-
-	return cfg;
+	return cfg = read_values();
 }
 
 bool config::change_cfg_values(const std::string& source_lang, const std::string& target_lang)

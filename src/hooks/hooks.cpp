@@ -1,5 +1,10 @@
 #include "hooks.h"
 
+#include "../common.h"
+#include "../globals.h"
+#include "../fmt/fmt.h"
+#include "../utils/utils.h"
+
 #include <curl/curl.h>
 
 HHOOK m_h = NULL;
@@ -21,20 +26,21 @@ static long __stdcall keyboard_proc_h(int c, WPARAM w, LPARAM l)
 {
 	switch (c) {
 	case HC_ACTION: {
-		if ((GetAsyncKeyState(VK_CONTROL) & 0x8000)) {
+		if ((GetAsyncKeyState(VK_CONTROL) & 0x8000))
+		{
 			KBDLLHOOKSTRUCT* k = (KBDLLHOOKSTRUCT*)l;
 
 			if (k->vkCode == 'X') {
-				static bool h = false;
+				static bool _switch = false;
 
 				if (m_hold_key_press) {
 					m_hold_key_press = false;
 					break;
 				}
 
-				ShowWindow(GetConsoleWindow(), h ? SW_SHOW : SW_HIDE);
+				ShowWindow(GetConsoleWindow(), _switch ? SW_SHOW : SW_HIDE);
 				
-				h = !h;
+				_switch = !_switch;
 				m_hold_key_press = true;
 			}
 		}

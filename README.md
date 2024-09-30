@@ -1,10 +1,10 @@
 ![Logo](https://github.com/xastrix/lswap/blob/master/media/logo.png)  
 This is a command line tool designed for swift translation between languages by simply copying and pasting data from the clipboard
 ```
-lswap run --log
+lswap r/run --log
       With logging (Displaying nontranslated and translated texts)
 
-lswap config <source_lang> <target_lang>
+lswap c/config <source_lang> <target_lang>
       Change the source and target languages in the configuration file
 ```
 ## Showcase

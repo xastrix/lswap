@@ -31,7 +31,7 @@ int cli::parse(int argc, const char** argv)
 	}
 }
 
-void cli::add(const std::string& cmd, std::function<void(int, args_t)> function)
+void cli::add(const std::string& cmd, std::function<void(int, arguments_t)> function)
 {
 	size_t pos = 0, prev_pos = 0;
 
