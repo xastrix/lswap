@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "../common.h"
 
 #include <locale>
 #include <unordered_map>
@@ -7,6 +8,43 @@
 void utils::set_locale()
 {
 	setlocale(LC_ALL, "");
+}
+
+bool utils::add_to_autorun(bool v)
+{
+	char reg_path[] = "Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+	HKEY k{};
+
+	LSTATUS status = RegCreateKeyEx(HKEY_CURRENT_USER, reg_path, 0, NULL,
+		REG_OPTION_VOLATILE, KEY_ALL_ACCESS, NULL, &k, NULL);
+
+	if (status == ERROR_SUCCESS)
+	{
+		if (v)
+		{
+			std::string path(MAX_PATH, '\0');
+			GetModuleFileName(NULL, &path[0], MAX_PATH);
+
+			status = RegSetValueEx(k, LSWAP_APPLICATION_NAME, 0,
+				REG_SZ, reinterpret_cast<const BYTE*>(path.c_str()), path.length() + 1);
+
+			if (status == ERROR_SUCCESS) {
+				RegCloseKey(k);
+				return true;
+			}
+		}
+		else
+		{
+			status = RegDeleteValue(k, LSWAP_APPLICATION_NAME);
+
+			if (status == ERROR_SUCCESS) {
+				RegCloseKey(k);
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 std::wstring utils::remove_chars(const std::wstring& str, const std::wstring& chars)

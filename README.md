@@ -6,6 +6,9 @@ lswap r/run --log
 
 lswap c/config <source_lang> <target_lang>
       Change the source and target languages in the configuration file
+
+lswap ar/autorun --on/--off
+      Adding to autorun
 ```
 ## Showcase
 ![Showcase](https://github.com/xastrix/lswap/blob/master/media/showcase.gif)

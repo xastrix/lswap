@@ -19,6 +19,13 @@ namespace utils
 	void set_locale();
 
 	/*
+	* Function adding the ability to add a program to autorun
+	* @param boolean (true - add, false - remove)
+	* @return boolean of successful
+	*/
+	bool add_to_autorun(bool v);
+
+	/*
 	* Remove characters from wstring
 	* @param wstring
 	* @param chars to remove
