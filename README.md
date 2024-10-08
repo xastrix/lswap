@@ -11,7 +11,12 @@ lswap ar/autorun --on/--off
       Adding to autorun
 ```
 ## Showcase
+### RU > EN
 ![Showcase](https://github.com/xastrix/lswap/blob/master/media/showcase.gif)
+### EN > DE
+![Showcase1](https://github.com/xastrix/lswap/blob/master/media/showcase1.gif)
+### RU > UK
+![Showcase2](https://github.com/xastrix/lswap/blob/master/media/showcase2.gif)
 ## Compiling
 Clone the repository
 ```c
