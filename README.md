@@ -2,13 +2,13 @@
 This is a command line tool designed for swift translation between languages by simply copying and pasting data from the clipboard
 ```
 lswap r/run --log
-      With logging (Displaying nontranslated and translated texts)
+      With logging (Displaying nontranslated and translated results)
 
 lswap c/config <source_lang> <target_lang>
       Change the source and target languages in the configuration file
 
 lswap ar/autorun --on/--off
-      Adding to autorun
+      Enable or Disable the autorun feature for the application
 ```
 ## Showcase
 #### RU > EN

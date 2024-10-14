@@ -1,14 +1,8 @@
 #include "utils.h"
 #include "../common.h"
 
-#include <locale>
 #include <unordered_map>
 #include <codecvt>
-
-void utils::set_locale()
-{
-	setlocale(LC_ALL, "");
-}
 
 bool utils::add_to_autorun(bool v)
 {

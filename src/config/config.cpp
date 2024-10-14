@@ -31,7 +31,6 @@ static cfg_t read_values()
 		}
 
 		size_t equal_pos = line.find('=');
-
 		if (equal_pos == std::string::npos) {
 			continue;
 		}
@@ -41,11 +40,11 @@ static cfg_t read_values()
 
 		value = value.substr(1, value.length() - 2);
 
-		if (key == "source_lang") {
+		if (key == "Source") {
 			cfg.source_lang = value;
 		}
 
-		else if (key == "target_lang") {
+		else if (key == "Target") {
 			cfg.target_lang = value;
 		}
 	}
@@ -60,10 +59,10 @@ static bool set_config_values(const std::string& source_lang, const std::string&
 	if (!f.is_open())
 		return false;
 
-	f << "# lswap version " LSWAP_VERSION_STRING "\n";
-	f << "# the configuration file\n\n";
-	f << "source_lang=\"" << source_lang << "\"\n";
-	f << "target_lang=\"" << target_lang << "\"";
+	f << "# The configuration file\n";
+	f << "# " LSWAP_APPLICATION_NAME " version " LSWAP_VERSION_STRING "\n\n";
+	f << "Source=\"" << source_lang << "\"\n";
+	f << "Target=\"" << target_lang << "\"";
 	
 	f.close();
 

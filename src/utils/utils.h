@@ -12,13 +12,6 @@
 namespace utils
 {
 	/*
-	* It sets the current locale for the entire program, which can affect how the program
-	* processes strings, formats text, and handles date and time
-	* @inside setlocale(LC_ALL, "");
-	*/
-	void set_locale();
-
-	/*
 	* Function adding the ability to add a program to autorun
 	* @param boolean (true - add, false - remove)
 	* @return boolean of successful

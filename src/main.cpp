@@ -7,7 +7,6 @@
 
 int main(int argc, const char** argv)
 {
-	utils::set_locale();
 	g::cfg = config::init();
 
 	cli cli{ []() {
@@ -17,13 +16,13 @@ int main(int argc, const char** argv)
 		fmt{ fmt_def, fc_cyan, "  %s > %s\n\n", g::cfg.source_lang.c_str(), g::cfg.target_lang.c_str() };
 
 		fmt{ fmt_def, fc_none, "%s r/run --log\n", LSWAP_APPLICATION_NAME };
-		fmt{ fmt_def, fc_cyan, "      With logging (Displaying nontranslated and translated texts)\n\n" };
+		fmt{ fmt_def, fc_cyan, "      With logging (Displaying nontranslated and translated results)\n\n" };
 
 		fmt{ fmt_def, fc_none, "%s c/config <source_lang> <target_lang>\n", LSWAP_APPLICATION_NAME };
 		fmt{ fmt_def, fc_cyan, "      Change the source and target languages in the configuration file\n\n" };
 
 		fmt{ fmt_def, fc_none, "%s ar/autorun --on/--off\n", LSWAP_APPLICATION_NAME };
-		fmt{ fmt_def, fc_cyan, "      Adding to autorun\n" };
+		fmt{ fmt_def, fc_cyan, "      Enable or Disable the autorun feature for the application\n" };
 	} };
 
 	cli.add("r/run", [](int ac, arguments_t args) {

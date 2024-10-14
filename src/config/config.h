@@ -11,15 +11,15 @@ namespace config
 {
 	/**
 	 * Load configuration file
-	 * @return configratuion struct with values
+	 * @return cfg_t struct
 	*/
 	cfg_t init();
 
 	/**
 	 * Change values in configuration file
-	 * @param source language (std::string)
-	 * @param target language (std::string)
-	 * @return configratuion struct with values
+	 * @param source language
+	 * @param target language
+	 * @return boolean of successful
 	*/
 	bool change_cfg_values(const std::string& source_lang, const std::string& target_lang);
 }
