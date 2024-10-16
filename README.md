@@ -4,11 +4,8 @@ This is a command line tool designed for swift translation between languages by 
 lswap r/run --log
       With logging (Displaying nontranslated and translated results)
 
-lswap c/config <source_lang> <target_lang>
+lswap c/config <SourceLanguage> <TargetLanguage>
       Change the source and target languages in the configuration file
-
-lswap ar/autorun --on/--off
-      Enable or Disable the autorun feature for the application
 ```
 ## Showcase
 #### RU > EN

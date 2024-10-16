@@ -18,11 +18,8 @@ int main(int argc, const char** argv)
 		fmt{ fmt_def, fc_none, "%s r/run --log\n", LSWAP_APPLICATION_NAME };
 		fmt{ fmt_def, fc_cyan, "      With logging (Displaying nontranslated and translated results)\n\n" };
 
-		fmt{ fmt_def, fc_none, "%s c/config <source_lang> <target_lang>\n", LSWAP_APPLICATION_NAME };
-		fmt{ fmt_def, fc_cyan, "      Change the source and target languages in the configuration file\n\n" };
-
-		fmt{ fmt_def, fc_none, "%s ar/autorun --on/--off\n", LSWAP_APPLICATION_NAME };
-		fmt{ fmt_def, fc_cyan, "      Enable or Disable the autorun feature for the application\n" };
+		fmt{ fmt_def, fc_none, "%s c/config <SourceLanguage> <TargetLanguage>\n", LSWAP_APPLICATION_NAME };
+		fmt{ fmt_def, fc_cyan, "      Change the source and target languages in the configuration file\n" };
 	} };
 
 	cli.add("r/run", [](int ac, arguments_t args) {
@@ -70,22 +67,6 @@ int main(int argc, const char** argv)
 
 			g::cfg = config::init(); // Reload configuration
 			fmt{ fmt_def, fc_none, "Updated: %s > %s\n", g::cfg.source_lang.c_str(), g::cfg.target_lang.c_str() };
-		}
-	});
-
-	cli.add("ar/autorun", [](int ac, arguments_t args) {
-		if (ac == 1 && args[1] == "--on") {
-			if (utils::add_to_autorun(true)) {
-				fmt{ fmt_30ms, fc_green, "%s successfully added to autorun", LSWAP_APPLICATION_NAME };
-			}
-		}
-		else if (ac == 1 && args[1] == "--off") {
-			if (utils::add_to_autorun(false)) {
-				fmt{ fmt_30ms, fc_green, "%s successfully removed from autorun", LSWAP_APPLICATION_NAME };
-			}
-		}
-		else {
-			fmt{ fmt_30ms, fc_none, "Invalid Arguments. Usage: %s ar/autorun --on/--off", LSWAP_APPLICATION_NAME };
 		}
 	});
 
