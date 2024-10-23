@@ -1,4 +1,4 @@
-<img align="left" src="https://github.com/xastrix/lswap/blob/master/media/logo.png">
+<img align="left" src="https://github.com/xastrixpets/lswap/blob/master/media/logo.png">
 <b>lswap</b>
 <p>This is a command line tool designed for swift translation between languages by simply copying and pasting data from the clipboard</p>
 <p>
@@ -8,9 +8,9 @@
   <a href="#license">License</a>
 </p>
 <h2>Showcase</h2>
-<img src="https://github.com/xastrix/lswap/blob/master/media/showcase.gif">
-<img src="https://github.com/xastrix/lswap/blob/master/media/showcase1.gif">
-<img src="https://github.com/xastrix/lswap/blob/master/media/showcase2.gif">
+<img src="https://github.com/xastrixpets/lswap/blob/master/media/showcase.gif">
+<img src="https://github.com/xastrixpets/lswap/blob/master/media/showcase1.gif">
+<img src="https://github.com/xastrixpets/lswap/blob/master/media/showcase2.gif">
 <h2>Compiling</h2>
 <p>Clone the repository</p>
 <pre>git clone --recursive https://github.com/xastrix/lswap.git</pre>
