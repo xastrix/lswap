@@ -13,7 +13,7 @@
 <img src="https://github.com/xastrixpets/lswap/blob/master/media/showcase2.gif">
 <h2>Compiling</h2>
 <p>Clone the repository</p>
-<pre>git clone --recursive https://github.com/xastrix/lswap.git</pre>
+<pre>git clone --recursive https://github.com/xastrixpets/lswap.git</pre>
 <p>
       Launch <kbd>build-vsXX.bat</kbd> (Where XX is the version of your VS). <br>
       After building, run <kbd>lswap.sln</kbd> (Visual Studio Solution File) and compile project by pressing <kbd><kbd>CTRL</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd></kbd>
