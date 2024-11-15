@@ -1,7 +1,6 @@
 <img align="left" src="https://github.com/xastrix/lswap/blob/master/media/logo.png">
 <b>lswap</b>
 <p>This is a command line tool designed for swift translation between languages by simply copying and pasting data from the clipboard</p>
-<p><a href="https://github.com/xastrix/lswap/tree/imgui-branch">imgui-branch: Version with UI based on imgui</a></p>
 <p>
   <a href="#showcase">Showcase</a> •
   <a href="#compiling">Compiling</a> •

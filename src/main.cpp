@@ -39,11 +39,9 @@ int main(int argc, const char** argv)
 		fmt{ fmt_def, fc_cyan, "  %s > %s\n\n", g::cfg.source_lang.c_str(), g::cfg.target_lang.c_str() };
 
 		fmt{ fmt_30ms, fc_yellow, "Hint: Highlight your text (CTRL + C) and paste (CTRL + V)" };
-		fmt{ fmt_30ms, fc_yellow, "Hint2: To close the program focus on window and press CTRL + C" };
-		fmt{ fmt_30ms, fc_yellow, "Hint3: You can hide the console window by pressing CTRL + X\n" };
 
 		if (g::m_log)
-			fmt{ fmt_def, fc_yellow, "Warning: Running in logging mode\n" };
+			fmt{ fmt_def, fc_blue, "Info: Running in logging mode\n\n" };
 
 		MSG msg;
 		while (GetMessage(&msg, NULL, 0, 0)) {

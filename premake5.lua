@@ -2,7 +2,7 @@ local global = "lswap"
 
 workspace (global)
     configurations { "Debug", "Release" }
-    platforms { "x64", "x86" }
+    platforms { "x86" }
 
 project (global)
     kind "ConsoleApp"
