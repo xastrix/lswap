@@ -5,7 +5,6 @@
 #include "../fmt/fmt.h"
 #include "../utils/utils.h"
 
-#include <locale>
 #include <curl/curl.h>
 
 enum clipboard_state {
@@ -92,8 +91,6 @@ static long __stdcall win_proc_h(HWND h, UINT m, WPARAM w, LPARAM l)
 
 void hooks::init()
 {
-	setlocale(LC_ALL, "");
-
 	WNDCLASS wc = { 0 };
 	wc.lpfnWndProc = win_proc_h;
 	wc.hInstance = GetModuleHandleA(NULL);
