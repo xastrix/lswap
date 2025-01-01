@@ -3,6 +3,11 @@
 #include <unordered_map>
 #include <codecvt>
 
+std::string utils::get_user_directory()
+{
+	return getenv("USERPROFILE");
+}
+
 std::wstring utils::remove_chars(const std::wstring& str, const std::wstring& chars)
 {
 	std::vector<wchar_t> chars_to_remove;

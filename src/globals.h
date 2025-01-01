@@ -5,5 +5,4 @@
 namespace g
 {
 	inline cfg_t cfg;
-	inline bool m_log = false;
 }

@@ -1,34 +1,28 @@
 #include "cli.h"
 
+#include <algorithm>
+
 int cli::parse(int argc, const char** argv)
 {
-	for (int i{ 1 }; i < argc; ++i) {
-		_arguments.push_back(argv[i]);
-	}
-
-	if (_arguments.empty()) {
-		_fn();
+	if (argc < 2) {
+		std::cout << _msg;
 		return 0;
 	}
 
-	std::string cmd = _arguments[0];
+	_arguments.assign(argv + 1, argv + argc);
 
-	if (cmd.empty()) {
-		_fn();
-		return 0;
-	}
+	std::string cmd = _arguments.front();
+	std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::tolower);
 
-	for (char& c : cmd) {
-		c = std::tolower(static_cast<unsigned char>(c));
-	}
-
-	if (_commands.find(cmd) != _commands.end()) {
-		_commands[cmd](argc - 2, _arguments);
+	auto it = _commands.find(cmd);
+	if (it != _commands.end()) {
+		it->second(argc - 2, _arguments);
 	}
 	else {
-		_fn();
-		return 0;
+		std::cout << _msg;
 	}
+
+	return 0;
 }
 
 void cli::add(const std::string& cmd, std::function<void(int, arguments_t)> function)

@@ -2,7 +2,7 @@ local global = "lswap"
 
 workspace (global)
     configurations { "Debug", "Release" }
-    platforms { "x86" }
+    platforms "x86"
 
 project (global)
     kind "ConsoleApp"
@@ -12,16 +12,16 @@ project (global)
 	targetdir "bin/%{cfg.buildcfg}"
 	objdir "obj/%{cfg.buildcfg}"
 
-	files { "src/**" }
-
-	externalincludedirs { "curl/curl/include" }
-	syslibdirs { "curl/lib" }
+	externalincludedirs "curl/curl/include"
+	syslibdirs "curl/lib/x86"
 
 	defines { "_CRT_SECURE_NO_WARNINGS", "CURL_STATICLIB" }
-	links { "libcurl.lib" }
+	links "libcurl_x86.lib"
 
-	buildoptions { "/std:c++latest" }
+	buildoptions "/std:c++latest"
 
 	characterset "MBCS"
 	warnings "Off"
 	optimize "Size"
+
+	files "src/**"

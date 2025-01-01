@@ -1,17 +1,17 @@
 #include "config.h"
-#include "../common.h"
 
 #include <fstream>
 #include <sstream>
 #include <filesystem>
 
-static std::string path;
+#include "../common.h"
+#include "../utils/utils.h"
 
 static cfg_t read_values()
 {
 	cfg_t cfg;
 
-	std::ifstream f(path);
+	std::ifstream f{ utils::get_user_directory() + "\\" LSWAP_CONFIGURATION_FILENAME };
 
 	if (!f.is_open()) {
 		return cfg;
@@ -54,7 +54,7 @@ static cfg_t read_values()
 
 static bool set_config_values(const std::string& source_lang, const std::string& target_lang)
 {
-	std::ofstream f(path);
+	std::ofstream f{ utils::get_user_directory() + "\\" LSWAP_CONFIGURATION_FILENAME };
 
 	if (!f.is_open())
 		return false;
@@ -73,13 +73,10 @@ cfg_t config::init()
 {
 	cfg_t cfg;
 
-	std::string user_directory = getenv("USERPROFILE");
-	path = user_directory + "\\" LSWAP_CONFIGURATION_FILENAME;
-
 	cfg.source_lang = "ru";
 	cfg.target_lang = "en";
 
-	if (!std::filesystem::exists(path))
+	if (!std::filesystem::exists(utils::get_user_directory() + "\\" LSWAP_CONFIGURATION_FILENAME))
 		set_config_values(cfg.source_lang, cfg.target_lang);
 
 	return cfg = read_values();
