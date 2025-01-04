@@ -5,7 +5,57 @@
 #include <filesystem>
 
 #include "../common.h"
+#include "../fmt/fmt.h"
 #include "../utils/utils.h"
+
+#define LANG_ARRAY_MAXSIZE 44
+
+static std::string lang_arr[LANG_ARRAY_MAXSIZE][2] = {
+	{ "en", "English" },
+	{ "ru", "Russian" },
+	{ "uk", "Ukrainian" },
+	{ "be", "Belarusian" },
+	{ "de", "Deutsch" },
+	{ "fr", "French" },
+	{ "he", "Hebrew" },
+	{ "af", "Afrikaans" },
+	{ "ar", "Arabic" },
+	{ "hy", "Armenian" },
+	{ "az", "Azerbaijani" },
+	{ "pl", "Polish" },
+	{ "da", "Danish" },
+	{ "bg", "Bulgarian" },
+	{ "sr", "Serbian" },
+	{ "es", "Spanish" },
+	{ "ja", "Japanese" },
+	{ "it", "Italian" },
+	{ "ko", "Korean" },
+	{ "sv", "Swedish" },
+	{ "et", "Estonian" },
+	{ "cs", "Czech" },
+	{ "fi", "Finnish" },
+	{ "fy", "Frisian" },
+	{ "hi", "Hindi" },
+	{ "tr", "Turkish" },
+	{ "tk", "Turkmen" },
+	{ "tg", "Tajik" },
+	{ "tt", "Tatar" },
+	{ "ro", "Romanian" },
+	{ "sk", "Slovak" },
+	{ "mo", "Moldavian" },
+	{ "mn", "Mongolian" },
+	{ "la", "Latin" },
+	{ "id", "Indonesian" },
+	{ "kk", "Kazakh" },
+	{ "uz", "Uzbek" },
+	{ "lv", "Latvian" },
+	{ "th", "Thai" },
+	{ "ur", "Urdu" },
+	{ "ku", "Kurdish" },
+	{ "no", "Norwegian" },
+	{ "pt", "Portuguese" },
+	{ "hu", "Hungarian" },
+};
 
 static cfg_t read_values()
 {
@@ -73,8 +123,8 @@ cfg_t config::init()
 {
 	cfg_t cfg;
 
-	cfg.source_lang = "ru";
-	cfg.target_lang = "en";
+	cfg.source_lang = lang_arr[0][0];
+	cfg.target_lang = lang_arr[4][0];
 
 	if (!std::filesystem::exists(utils::get_user_directory() + "\\" LSWAP_CONFIGURATION_FILENAME))
 		set_config_values(cfg.source_lang, cfg.target_lang);
@@ -84,5 +134,33 @@ cfg_t config::init()
 
 bool config::change_cfg_values(const std::string& source_lang, const std::string& target_lang)
 {
+	bool source_found = false;
+	bool target_found = false;
+
+	for (int i = 0; i < LANG_ARRAY_MAXSIZE; i++)
+	{
+		if (lang_arr[i][0] == source_lang) source_found = true;
+		if (lang_arr[i][0] == target_lang) target_found = true;
+	}
+
+	if (!source_found || !target_found)
+	{
+		if (!source_found)
+			fmt{ fmt_def, fc_none, "Source language not found in database\n" };
+
+		else if (!target_found)
+			fmt{ fmt_def, fc_none, "Target language not found in database\n" };
+
+		fmt{ fmt_def, fc_none, "List of available languages:\n" };
+
+		for (int i = 0; i < LANG_ARRAY_MAXSIZE; i++) {
+			fmt{ fmt_def, fc_none, "\"%s\" - %s", lang_arr[i][0].c_str(), lang_arr[i][1].c_str() };
+			if (i != (LANG_ARRAY_MAXSIZE - 1))
+				fmt{ fmt_def, fc_none, ",\n" };
+		}
+
+		return false;
+	}
+
 	return set_config_values(source_lang, target_lang);
 }
