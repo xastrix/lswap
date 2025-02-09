@@ -1,7 +1,6 @@
 #include "hooks.h"
 
 #include "../common.h"
-#include "../globals.h"
 #include "../fmt/fmt.h"
 #include "../utils/utils.h"
 
@@ -44,13 +43,13 @@ static long __stdcall win_proc_h(HWND h, UINT m, WPARAM w, LPARAM l)
 
 			if (!current_clipboard.empty())
 			{
-				std::wstring buffer, clipboard = utils::remove_chars(current_clipboard, FORBIDDEN_CHARS);
-
 				std::string url;
-				curl_escape_url(curl, clipboard, url = std::string {
+				curl_escape_url(curl, current_clipboard, url = std::string {
 					"https://translate.googleapis.com/translate_a/single?client=gtx&sl=" +
 					g::cfg.source_lang + "&tl=" + g::cfg.target_lang + "&dt=t&q="
 				});
+
+				std::wstring buffer;
 
 				curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 				curl_easy_setopt(curl, CURLOPT_USERAGENT, LSWAP_APPLICATION_NAME "/" LSWAP_VERSION_STRING);
@@ -62,13 +61,16 @@ static long __stdcall win_proc_h(HWND h, UINT m, WPARAM w, LPARAM l)
 
 				if (res == CURLE_OK)
 				{
-					std::wstring text = utils::parse_json(buffer);
+					std::wstring res = utils::parse_json(buffer, g::cfg);
 
-					if (!text.empty())
-					{
-						utils::put_in_clipboard(m_hwnd, text);
-						m_state = cb_processing;
-					}
+					if (!res.empty())
+						utils::put_in_clipboard(m_hwnd, res);
+
+					m_state = cb_processing;
+				}
+				else {
+					std::string msg = curl_easy_strerror(res);
+					utils::put_in_clipboard(m_hwnd, L"curl: " + std::wstring{ msg.begin(), msg.end() });
 				}
 			}
 		}

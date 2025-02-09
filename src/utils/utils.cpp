@@ -2,31 +2,42 @@
 
 #include <unordered_map>
 #include <codecvt>
+#include <algorithm>
+#include <cctype>
+
+static bool is_md5(const std::wstring& string)
+{
+	if (string.length() != 32)
+		return false;
+
+	for (wchar_t c : string) {
+		if (!std::isxdigit(c)) {
+			return false;
+		}
+	}
+
+	return true;
+}
 
 std::string utils::get_user_directory()
 {
 	return getenv("USERPROFILE");
 }
 
-std::wstring utils::remove_chars(const std::wstring& str, const std::wstring& chars)
-{
-	std::vector<wchar_t> chars_to_remove;
-	for (size_t i = 0; i < chars.length(); ++i)
-	{
-		chars_to_remove.push_back(chars[i]);
-	}
+std::wstring utils::replace_patterns(const std::wstring& input,
+	const std::vector<std::wstring>& a_list,
+	const std::vector<std::wstring>& b_list) {
+	std::wstring result = input;
 
-	std::wstring mod;
-
-	for (size_t i = 0; i < str.length(); ++i)
-	{
-		if (std::find(chars_to_remove.begin(), chars_to_remove.end(), str[i]) == chars_to_remove.end())
-		{
-			mod += str[i];
+	for (int i = 0; i < a_list.size(); ++i) {
+		std::wstring::size_type pos = 0;
+		while ((pos = result.find(a_list[i], pos)) != std::wstring::npos) {
+			result.replace(pos, a_list[i].length(), b_list[i]);
+			pos += b_list[i].length();
 		}
 	}
 
-	return mod;
+	return result;
 }
 
 std::wstring utils::get_current_clipboard(HWND hwnd)
@@ -84,18 +95,65 @@ void utils::put_in_clipboard(HWND hwnd, const std::wstring& data)
 	CloseClipboard();
 }
 
-std::wstring utils::parse_json(const std::wstring& json)
+std::wstring utils::parse_json(const std::wstring& json, cfg_t cfg)
 {
-	size_t start = json.find(L"\"");
-	size_t end = json.find(L"\"", start + 1);
+	std::vector<std::wstring> result;
 
-	std::wstring result;
+	size_t pos = 0;
+	while ((pos = json.find(L'"', pos)) != std::wstring::npos) {
+		size_t begin_pos = pos + 1;
+		size_t end_pos = begin_pos;
 
-	if (start != std::wstring::npos && end != std::wstring::npos) {
-		result = json.substr(start + 1, end - start - 1);
+		while (end_pos < json.size()) {
+			end_pos = json.find(L'"', end_pos);
+
+			if (end_pos == std::wstring::npos)
+				break;
+
+			if (end_pos > 0 && json[end_pos - 1] == L'\\') {
+				end_pos++;
+				continue;
+			}
+			break;
+		}
+
+		if (end_pos != std::wstring::npos) {
+			result.push_back({ json.substr(begin_pos, end_pos - begin_pos) });
+			pos = end_pos + 1;
+		}
+		else {
+			break;
+		}
 	}
 
-	return result;
+	result.erase(std::remove_if(result.begin(), result.end(),
+		[](const std::wstring& s) { return is_md5(s); }),
+	result.end());
+
+	std::vector<std::wstring> ignore_tables = {
+		L"efficient_models_2022q2.md",
+		L"offline",
+	};
+
+	ignore_tables.push_back({ cfg.source_lang.begin(), cfg.source_lang.end() });
+
+	result.erase(std::remove_if(result.begin(), result.end(), [&ignore_tables](const std::wstring& item) {
+		return std::find(ignore_tables.begin(), ignore_tables.end(), item) != ignore_tables.end();
+	}), result.end());
+
+	std::vector<std::wstring> filtered;
+
+	for (int i = 0; i < result.size(); i += 2) {
+		filtered.push_back(result[i]);
+	}
+
+	std::wstring final;
+
+	for (const auto& word : filtered) {
+		final += replace_patterns(word, { L"\\r\\n" }, { L"\n" });
+	}
+
+	return final;
 }
 
 size_t utils::write_callback(void* contents, size_t size, size_t nmemb, void* userp)

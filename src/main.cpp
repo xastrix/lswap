@@ -1,5 +1,4 @@
 #include "common.h"
-#include "globals.h"
 #include "cli/cli.h"
 #include "fmt/fmt.h"
 #include "hooks/hooks.h"

@@ -2,12 +2,9 @@
 
 #include <windows.h>
 #include <string>
+#include <vector>
 
-/*
-* String of forbidden characters that will be deleted
-* @description this is needed for curl_easy_escape() function to avoid some bugs
-*/
-#define FORBIDDEN_CHARS L"@#$%^&*\"\\/:\r\n\t<>(){}"
+#include "../globals.h"
 
 namespace utils
 {
@@ -18,12 +15,21 @@ namespace utils
 	std::string get_user_directory();
 
 	/*
-	 * Remove characters from wstring
-	 * @param wstring
-	 * @param chars to remove
-	 * @return result in std::wstring
+	 * Replace patterns in a given string
+	 * This function takes an input string and replaces all occurrences of
+	 * patterns defined in the a_list with corresponding patterns in b_list.
+	 * The function performs the replacements in the order they appear in a_list.
+	 * @param input The original string in which patterns will be replaced
+	 * @param a_list A vector of strings containing the patterns to be replaced
+	 * @param b_list A vector of strings containing the replacement patterns
+	 * corresponding to those in a_list.
+	 * Must be the same size as a_list.
+	 * @return A new string with all occurrences of patterns in a_list replaced
+	 * by corresponding patterns in b_list.
 	*/
-	std::wstring remove_chars(const std::wstring& str, const std::wstring& chars);
+	std::wstring replace_patterns(const std::wstring& input,
+		const std::vector<std::wstring>& a_list,
+		const std::vector<std::wstring>& b_list);
 
 	/*
 	 * Get clipboard data
@@ -40,11 +46,15 @@ namespace utils
 	void put_in_clipboard(HWND hwnd, const std::wstring& data);
 	
 	/*
-	 * Parse json
-	 * @param json data
-	 * @return result in std::wstring
+	 * Parse JSON string and extract relevant data
+	 * This function takes a JSON string and a configuration object as input,
+	 * extracts the strings within double quotes, filters out ignored tables,
+	 * and returns a new string with the extracted data.
+	 * @param json The input JSON string to be parsed
+	 * @param cfg A configuration object containing information about the source language
+	 * @return A new string with the extracted data
 	*/
-	std::wstring parse_json(const std::wstring& json);
+	std::wstring parse_json(const std::wstring& json, cfg_t cfg);
 
 	/*
 	 * Write callback function (Using in cURL)
