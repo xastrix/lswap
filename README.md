@@ -11,6 +11,7 @@
 <img src="https://github.com/xastrix/lswap/blob/master/media/showcase.gif">
 <img src="https://github.com/xastrix/lswap/blob/master/media/showcase1.gif">
 <img src="https://github.com/xastrix/lswap/blob/master/media/showcase2.gif">
+<img src="https://github.com/xastrix/lswap/blob/master/media/showcase3.gif">
 <h2>Compiling</h2>
 <p>Clone the repository</p>
 <pre>git clone --recursive https://github.com/xastrix/lswap.git</pre>

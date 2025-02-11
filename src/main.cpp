@@ -19,7 +19,7 @@ int main(int argc, const char** argv)
 	};
 
 	cli.add("r/run", [](int ac, arguments_t args) {
-		HANDLE mutex = CreateMutexA(NULL, FALSE, LSWAP_MUTEX_NAME);
+		auto mutex = CreateMutexA(NULL, FALSE, LSWAP_MUTEX_NAME);
 
 		if (mutex == NULL) {
 			fmt{ fmt_30ms, fc_red, "fatal: failed to create mutex" }.die();

@@ -71,5 +71,5 @@ namespace utils
 	 * @param the wstring to be converted
 	 * @return result in std::string
 	*/
-	std::string to_utf8(const std::wstring& str);
+	std::string to_utf8(const std::wstring& string);
 }

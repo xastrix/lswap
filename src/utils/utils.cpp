@@ -143,14 +143,13 @@ std::wstring utils::parse_json(const std::wstring& json, cfg_t cfg)
 
 	std::vector<std::wstring> filtered;
 
-	for (int i = 0; i < result.size(); i += 2) {
+	for (int i = 0; i < result.size(); i += 2)
 		filtered.push_back(result[i]);
-	}
 
 	std::wstring finalized;
 	for (const auto& word : filtered) {
-		finalized += replace_patterns(word, {
-			L"\\r\\n", L"\\\"" }, { L"\n", L"\"" }
+		finalized += replace_patterns(word,
+			{ L"\\r\\n", L"\\\"" }, { L"\n", L"\"" }
 		);
 	}
 
@@ -161,7 +160,7 @@ size_t utils::write_callback(void* contents, size_t size, size_t nmemb, void* us
 {
 	size_t rlsize = size * nmemb;
 	char* wcontents = new char[rlsize];
-	std::memcpy(wcontents, contents, rlsize);
+	memcpy(wcontents, contents, rlsize);
 
 	std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
 	std::wstring w_mem = converter.from_bytes(std::string(wcontents, wcontents + rlsize));
@@ -174,8 +173,7 @@ size_t utils::write_callback(void* contents, size_t size, size_t nmemb, void* us
 	return rlsize;
 }
 
-std::string utils::to_utf8(const std::wstring& str)
+std::string utils::to_utf8(const std::wstring& string)
 {
-	static std::wstring_convert<std::codecvt_utf8<wchar_t>> u8;
-	return u8.to_bytes(str);
+	return std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes(string);
 }
