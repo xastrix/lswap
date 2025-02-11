@@ -147,13 +147,14 @@ std::wstring utils::parse_json(const std::wstring& json, cfg_t cfg)
 		filtered.push_back(result[i]);
 	}
 
-	std::wstring final;
-
+	std::wstring finalized;
 	for (const auto& word : filtered) {
-		final += replace_patterns(word, { L"\\r\\n" }, { L"\n" });
+		finalized += replace_patterns(word, {
+			L"\\r\\n", L"\\\"" }, { L"\n", L"\"" }
+		);
 	}
 
-	return final;
+	return finalized;
 }
 
 size_t utils::write_callback(void* contents, size_t size, size_t nmemb, void* userp)
