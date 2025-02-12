@@ -77,7 +77,7 @@ static long __stdcall win_proc_h(HWND h, UINT m, WPARAM w, LPARAM l)
 		break;
 	}
 	case WM_DESTROY: {
-		RemoveClipboardFormatListener(m_hwnd);
+		hooks::free();
 		PostQuitMessage(0);
 		break;
 	}

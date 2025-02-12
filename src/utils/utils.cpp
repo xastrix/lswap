@@ -59,7 +59,7 @@ std::wstring utils::get_current_clipboard(HWND hwnd)
 		return L"";
 	}
 
-	std::wstring result = data;
+	std::wstring result{ data };
 
 	GlobalUnlock(h);
 	CloseClipboard();

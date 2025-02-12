@@ -8,55 +8,6 @@
 #include "../fmt/fmt.h"
 #include "../utils/utils.h"
 
-#define LANG_ARRAY_MAXSIZE 44
-
-static std::string lang_arr[LANG_ARRAY_MAXSIZE][2] = {
-	{ "en", "English" },
-	{ "ru", "Russian" },
-	{ "uk", "Ukrainian" },
-	{ "be", "Belarusian" },
-	{ "de", "Deutsch" },
-	{ "fr", "French" },
-	{ "he", "Hebrew" },
-	{ "af", "Afrikaans" },
-	{ "ar", "Arabic" },
-	{ "hy", "Armenian" },
-	{ "az", "Azerbaijani" },
-	{ "pl", "Polish" },
-	{ "da", "Danish" },
-	{ "bg", "Bulgarian" },
-	{ "sr", "Serbian" },
-	{ "es", "Spanish" },
-	{ "ja", "Japanese" },
-	{ "it", "Italian" },
-	{ "ko", "Korean" },
-	{ "sv", "Swedish" },
-	{ "et", "Estonian" },
-	{ "cs", "Czech" },
-	{ "fi", "Finnish" },
-	{ "fy", "Frisian" },
-	{ "hi", "Hindi" },
-	{ "tr", "Turkish" },
-	{ "tk", "Turkmen" },
-	{ "tg", "Tajik" },
-	{ "tt", "Tatar" },
-	{ "ro", "Romanian" },
-	{ "sk", "Slovak" },
-	{ "mo", "Moldavian" },
-	{ "mn", "Mongolian" },
-	{ "la", "Latin" },
-	{ "id", "Indonesian" },
-	{ "kk", "Kazakh" },
-	{ "uz", "Uzbek" },
-	{ "lv", "Latvian" },
-	{ "th", "Thai" },
-	{ "ur", "Urdu" },
-	{ "ku", "Kurdish" },
-	{ "no", "Norwegian" },
-	{ "pt", "Portuguese" },
-	{ "hu", "Hungarian" },
-};
-
 static cfg_t read_values()
 {
 	cfg_t cfg;
@@ -74,7 +25,7 @@ static cfg_t read_values()
 
 	f.close();
 
-	std::stringstream ss(content);
+	std::stringstream ss{ content };
 	while (std::getline(ss, line)) {
 		if (line.empty() || line[0] == '#') {
 			continue;
@@ -109,8 +60,8 @@ static bool set_config_values(const std::string& source_lang, const std::string&
 	if (!f.is_open())
 		return false;
 
-	f << "# The configuration file\n";
-	f << "# " LSWAP_APPLICATION_NAME " version " LSWAP_VERSION_STRING "\n\n";
+	f << "# " LSWAP_APPLICATION_NAME " (" LSWAP_VERSION_STRING ")\n\n";
+
 	f << "Source=\"" << source_lang << "\"\n";
 	f << "Target=\"" << target_lang << "\"";
 	
@@ -146,15 +97,16 @@ bool config::change_cfg_values(const std::string& source_lang, const std::string
 	if (!source_found || !target_found)
 	{
 		if (!source_found)
-			fmt{ fmt_def, fc_none, "Source language not found in database\n" };
+			fmt{ fmt_30ms, fc_none, "source language not found in database" };
 
 		else if (!target_found)
-			fmt{ fmt_def, fc_none, "Target language not found in database\n" };
+			fmt{ fmt_30ms, fc_none, "target language not found in database" };
 
-		fmt{ fmt_def, fc_none, "List of available languages:\n" };
+		fmt{ fmt_def, fc_none, "\n" };
+		fmt{ fmt_def, fc_none, "list of available languages:\n" };
 
 		for (int i = 0; i < LANG_ARRAY_MAXSIZE; i++) {
-			fmt{ fmt_def, fc_none, "\"%s\" - %s", lang_arr[i][0].c_str(), lang_arr[i][1].c_str() };
+			fmt{ fmt_def, fc_none, "  \"%s\" - %s", lang_arr[i][0].c_str(), lang_arr[i][1].c_str() };
 			if (i != (LANG_ARRAY_MAXSIZE - 1))
 				fmt{ fmt_def, fc_none, ",\n" };
 		}
