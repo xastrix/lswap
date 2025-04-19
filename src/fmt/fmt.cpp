@@ -28,14 +28,6 @@ fmt::fmt(fmt_mode mode, fmt_col col, const char* fmt, ...)
 				std::this_thread::sleep_for(std::chrono::milliseconds(30));
 				break;
 			}
-			case fmt_50ms: {
-				std::this_thread::sleep_for(std::chrono::milliseconds(50));
-				break;
-			}
-			case fmt_100ms: {
-				std::this_thread::sleep_for(std::chrono::milliseconds(100));
-				break;
-			}
 			}
 			word = strtok(NULL, " ");
 		}

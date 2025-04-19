@@ -22,7 +22,7 @@ int main(int argc, const char** argv)
 		LSWAP_APPLICATION_NAME " run\n"
 		"  Starting the application\n\n"
 
-		LSWAP_APPLICATION_NAME " config <SourceLanguage> <TargetLanguage>\n"
+		LSWAP_APPLICATION_NAME " c/config <SourceLanguage> <TargetLanguage>\n"
 		"  Change the source and target languages in the configuration file\n"
 	};
 
@@ -30,10 +30,10 @@ int main(int argc, const char** argv)
 		return client::init();
 	});
 
-	cli.add("config", [](int ac, arguments_t args) {
+	cli.add("c/config", [](int ac, arguments_t args) {
 		if (ac != 2) {
 			fmt{ fmt_def, fc_none, "Current configuration: %s > %s\n", g_cfg.source_lang.c_str(), g_cfg.target_lang.c_str() };
-			fmt{ fmt_def, fc_none, "For change it, type \"%s config <SourceLanguage> <TargetLanguage>\"\n", LSWAP_APPLICATION_NAME };
+			fmt{ fmt_def, fc_none, "For change it, type \"%s c/config <SourceLanguage> <TargetLanguage>\"\n", LSWAP_APPLICATION_NAME };
 			return;
 		}
 
@@ -109,12 +109,59 @@ static long __stdcall win_proc_h(HWND h, UINT m, WPARAM w, LPARAM l)
 
 				if (res == CURLE_OK)
 				{
-					auto res = utils::parse_json(buffer, g_cfg);
+					resp_codes response_code;
+					curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
 
-					if (!res.empty())
-						utils::put_in_clipboard(g_hwnd, res);
+					if (response_code == resp_ok_code)
+					{
+						auto json_res = utils::parse_json(buffer, g_cfg);
 
-					g_state = cb_processing;
+						if (!json_res.empty())
+							utils::put_in_clipboard(g_hwnd, json_res);
+
+						g_state = cb_processing;
+					}
+					else
+					{
+						std::wstring error_msg;
+
+						switch (response_code) {
+						case bad_request_code: {
+							error_msg = L"(Google Translate Service) Bad Request - The server could not understand the request due to invalid syntax";
+							break;
+						}
+						case unauthorized_code: {
+							error_msg = L"(Google Translate Service) Unauthorized - The client must authenticate itself to get the requested response";
+							break;
+						}
+						case forbidden_code: {
+							error_msg = L"(Google Translate Service) Forbidden - The client does not have access rights to the content";
+							break;
+						}
+						case not_found_code: {
+							error_msg = L"(Google Translate Service) Not Found - The server can not find the requested resource";
+							break;
+						}
+						case internal_server_err_code: {
+							error_msg = L"(Google Translate Service) Internal Server Error - The server has encountered a situation it doesn't know how to handle";
+							break;
+						}
+						case bad_gateway_code: {
+							error_msg = L"(Google Translate Service) Bad Gateway - The server was acting as a gateway or proxy and received an invalid response from the upstream server";
+							break;
+						}
+						case service_unavailable_code: {
+							error_msg = L"(Google Translate Service) Service Unavailable - The server is not ready to handle the request";
+							break;
+						}
+						default: {
+							error_msg = L"(Google Translate Service) Unexpected Error - Returned " + std::to_wstring(response_code) + L" code";
+							break;
+						}
+						}
+
+						utils::put_in_clipboard(g_hwnd, L"curl: " + error_msg);
+					}
 				}
 				else {
 					std::string msg = curl_easy_strerror(res);
@@ -166,12 +213,12 @@ static void init_class()
 	g_hwnd = CreateWindowExA(0, wc.lpszClassName, LSWAP_APPLICATION_NAME, 0, 0, 0, 0, 0, NULL, NULL, wc.hInstance, NULL);
 
 	if (g_hwnd == NULL) {
-		fmt{ fmt_def, fc_red, "fatal: CreateWindowEx() == NULL\n" }.die();
+		fmt{ fmt_def, fc_red, "fatal: CreateWindowEx(...) == NULL\n" }.die();
 	}
 
 	if (AddClipboardFormatListener(g_hwnd) == FALSE) {
 		free_class();
-		fmt{ fmt_def, fc_red, "fatal: AddClipboardFormatListener() == FALSE\n" }.die();
+		fmt{ fmt_def, fc_red, "fatal: AddClipboardFormatListener(...) == FALSE\n" }.die();
 	}
 }
 

@@ -96,14 +96,16 @@ bool config::change_cfg_values(const std::string& source_lang, const std::string
 
 	if (!source_found || !target_found)
 	{
-		if (!source_found)
-			fmt{ fmt_30ms, fc_none, "source language not found in database" };
+		fmt{ fmt_30ms, fc_none, "Failed to change the configuration" };
 
-		else if (!target_found)
-			fmt{ fmt_30ms, fc_none, "target language not found in database" };
+		if (!source_found)
+			fmt{ fmt_30ms, fc_none, "fatal: Source language (%s) not found in database", source_lang.c_str() };
+
+		if (!target_found)
+			fmt{ fmt_30ms, fc_none, "fatal: Target language (%s) not found in database", target_lang.c_str() };
 
 		fmt{ fmt_def, fc_none, "\n" };
-		fmt{ fmt_def, fc_none, "list of available languages:\n" };
+		fmt{ fmt_def, fc_none, "List of available languages:\n" };
 
 		for (int i = 0; i < LANG_ARRAY_MAXSIZE; i++) {
 			fmt{ fmt_def, fc_none, "  \"%s\" - %s", lang_arr[i][0].c_str(), lang_arr[i][1].c_str() };

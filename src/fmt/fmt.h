@@ -18,8 +18,6 @@ enum fmt_col {
 enum fmt_mode {
 	fmt_def,
 	fmt_30ms,
-	fmt_50ms,
-	fmt_100ms,
 };
 
 struct fmt {
