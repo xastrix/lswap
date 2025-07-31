@@ -177,3 +177,55 @@ std::string utils::to_utf8(const std::wstring& string)
 {
 	return std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes(string);
 }
+
+bool utils::is_in_autorun(const std::string& app_name)
+{
+	HKEY k{};
+	std::string reg_path{ "Software\\Microsoft\\Windows\\CurrentVersion\\Run" };
+	LSTATUS status = RegOpenKeyExA(HKEY_CURRENT_USER, reg_path.c_str(), 0, KEY_READ, &k);
+
+	if (status == ERROR_SUCCESS)
+	{
+		DWORD type = 0;
+		char value[MAX_PATH];
+		DWORD value_size = sizeof(value);
+
+		status = RegQueryValueExA(k, app_name.c_str(), NULL, &type, (LPBYTE)&value, &value_size);
+
+		RegCloseKey(k);
+
+		if (type == REG_SZ)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void utils::put_in_autorun(const std::string& app_name, bool v)
+{
+	HKEY k{};
+	std::string reg_path{ "Software\\Microsoft\\Windows\\CurrentVersion\\Run" };
+
+	LSTATUS status = RegCreateKeyExA(HKEY_CURRENT_USER, reg_path.c_str(), 0, NULL,
+		REG_OPTION_VOLATILE, KEY_ALL_ACCESS, NULL, &k, NULL);
+
+	if (status == ERROR_SUCCESS)
+	{
+		if (v)
+		{
+			std::string path(MAX_PATH, '\0');
+			GetModuleFileNameA(NULL, &path[0], MAX_PATH);
+
+			status = RegSetValueExA(k, app_name.c_str(), 0,
+				REG_SZ, reinterpret_cast<const BYTE*>(path.c_str()), path.length() + 1);
+		}
+		else
+		{
+			status = RegDeleteValueA(k, app_name.c_str());
+		}
+
+		RegCloseKey(k);
+	}
+}

@@ -25,7 +25,7 @@ int cli::parse(int argc, const char** argv)
 	return 0;
 }
 
-void cli::add(const std::string& cmd, std::function<void(int, arguments_t)> function)
+void cli::add(const std::string& cmd, std::function<void(int, args_t)> function)
 {
 	size_t pos = 0, prev_pos = 0;
 
@@ -35,4 +35,12 @@ void cli::add(const std::string& cmd, std::function<void(int, arguments_t)> func
 	}
 
 	_commands[cmd.substr(prev_pos)] = function;
+}
+
+void cli::call(const std::string& cmd, int argc, args_t args)
+{
+	auto it = _commands.find(cmd);
+	if (it != _commands.end()) {
+		it->second(argc, args);
+	}
 }

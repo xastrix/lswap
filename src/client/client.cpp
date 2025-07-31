@@ -1,21 +1,7 @@
 #include "client.h"
 
-HWND            g_hwnd  = NULL;
-HANDLE          g_mutex = NULL;
-clipboard_state g_state = cb_idle;
-cfg_t           g_cfg   = {};
-
-static void init_mutex();
-static void free_mutex();
-static void init_class();
-static void free_class();
-static void curl_escape_url(CURL* curl, const std::wstring& in, std::string& url);
-static long __stdcall win_proc_h(HWND h, UINT m, WPARAM w, LPARAM l);
-
 int main(int argc, const char** argv)
 {
-	g_cfg = config::init();
-
 	cli cli {
 		LSWAP_APPLICATION_NAME " (" LSWAP_VERSION_STRING ") is a command line tool designed for swift translation between languages by simply copying and pasting data from the clipboard\n\n"
 
@@ -23,31 +9,48 @@ int main(int argc, const char** argv)
 		"  Starting the application\n\n"
 
 		LSWAP_APPLICATION_NAME " c/config <SourceLanguage> <TargetLanguage>\n"
-		"  Change the source and target languages in the configuration file\n"
+		"  Change the source and target languages in the configuration file\n\n"
+
+		LSWAP_APPLICATION_NAME " ar/autorun <--on/--off>\n"
+		"  Adding a program to startup\n"
 	};
 
-	cli.add("run", [](int ac, arguments_t args) {
+	client::globals::g_cfg = config::init();
+
+	cli.add(_cmd[cl_run], [](int, args_t) {
 		return client::init();
 	});
 
-	cli.add("c/config", [](int ac, arguments_t args) {
+	cli.add(_cmd[cl_config], [](int ac, args_t args) {
 		if (ac != 2) {
-			fmt{ fmt_def, fc_none, "Current configuration: %s > %s\n", g_cfg.source_lang.c_str(), g_cfg.target_lang.c_str() };
+			fmt{ fmt_def, fc_none, "Current configuration: %s > %s\n", client::globals::g_cfg.source_lang.c_str(), client::globals::g_cfg.target_lang.c_str() };
 			fmt{ fmt_def, fc_none, "For change it, type \"%s c/config <SourceLanguage> <TargetLanguage>\"\n", LSWAP_APPLICATION_NAME };
 			return;
 		}
 
-		if (config::change_cfg_values(args[1], args[2]))
-		{
-			g_cfg = config::init(); // Reload configuration
+		if (!config::change_cfg_values(args[1], args[2]))
+			return;
 
-			fmt{ fmt_30ms, fc_green, "The configuration file has been updated!" };
-			fmt{ fmt_def, fc_none, "Updated configuration: %s > %s\n", g_cfg.source_lang.c_str(), g_cfg.target_lang.c_str() };
+		client::globals::g_cfg = config::init(); // Reload configuration
+
+		fmt{ fmt_30ms, fc_green, "The configuration file has been updated!" };
+		fmt{ fmt_def, fc_none, "Updated configuration: %s > %s\n", client::globals::g_cfg.source_lang.c_str(), client::globals::g_cfg.target_lang.c_str() };
+	});
+
+	cli.add(_cmd[cl_autorun], [](int ac, args_t args) {
+		if (ac != 1 || (args[1] != "--on" && args[1] != "--off")) {
+			fmt{ fmt_30ms, fc_none, "Invalid Arguments. Usage: %s ar/autorun --on/--off", LSWAP_APPLICATION_NAME };
 			return;
 		}
 
-		fmt{ fmt_30ms, fc_none, "Failed to change the configuration, check permissions" };
+		utils::put_in_autorun(LSWAP_APPLICATION_NAME, args[1] == "--on" ? true : false);
+
+		fmt{ fmt_30ms, fc_green, "%s successfully %s from autorun", LSWAP_APPLICATION_NAME,
+			args[1] == "--on" ? "added" : "removed"};
 	});
+
+	if (argc == 1 && utils::is_in_autorun(LSWAP_APPLICATION_NAME))
+		cli.call(_cmd[cl_run], 0, {});
 
 	return cli.parse(argc, argv);
 }
@@ -58,7 +61,7 @@ void client::init()
 	init_class();
 
 	fmt{ fmt_def, fc_none, "The service has been launched...\n" };
-	fmt{ fmt_def, fc_none, "Current configuration: %s > %s\n", g_cfg.source_lang.c_str(), g_cfg.target_lang.c_str() };
+	fmt{ fmt_def, fc_none, "Current configuration: %s > %s\n", globals::g_cfg.source_lang.c_str(), globals::g_cfg.target_lang.c_str() };
 
 	MSG msg;
 	while (GetMessageA(&msg, NULL, 0, 0)) {
@@ -74,169 +77,4 @@ void client::free()
 {
 	free_class();
 	free_mutex();
-}
-
-static long __stdcall win_proc_h(HWND h, UINT m, WPARAM w, LPARAM l)
-{
-	switch (m) {
-	case WM_CLIPBOARDUPDATE: {
-		if (g_state == cb_processing) {
-			g_state = cb_idle;
-			break;
-		}
-
-		if (auto* curl = curl_easy_init())
-		{
-			auto current_clipboard = utils::get_current_clipboard(g_hwnd);
-
-			if (!current_clipboard.empty())
-			{
-				std::string url;
-				curl_escape_url(curl, current_clipboard, url = std::string {
-					"https://translate.googleapis.com/translate_a/single?client=gtx&sl=" +
-					g_cfg.source_lang + "&tl=" + g_cfg.target_lang + "&dt=t&q="
-				});
-
-				std::wstring buffer;
-
-				curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-				curl_easy_setopt(curl, CURLOPT_USERAGENT, LSWAP_APPLICATION_NAME "/" LSWAP_VERSION_STRING);
-				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, utils::write_callback);
-				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
-				curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
-
-				auto res = curl_easy_perform(curl);
-
-				if (res == CURLE_OK)
-				{
-					resp_codes response_code;
-					curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-
-					if (response_code == resp_ok_code)
-					{
-						auto json_res = utils::parse_json(buffer, g_cfg);
-
-						if (!json_res.empty())
-							utils::put_in_clipboard(g_hwnd, json_res);
-
-						g_state = cb_processing;
-					}
-					else
-					{
-						std::wstring error_msg;
-
-						switch (response_code) {
-						case bad_request_code: {
-							error_msg = L"(Google Translate Service) Bad Request - The server could not understand the request due to invalid syntax";
-							break;
-						}
-						case unauthorized_code: {
-							error_msg = L"(Google Translate Service) Unauthorized - The client must authenticate itself to get the requested response";
-							break;
-						}
-						case forbidden_code: {
-							error_msg = L"(Google Translate Service) Forbidden - The client does not have access rights to the content";
-							break;
-						}
-						case not_found_code: {
-							error_msg = L"(Google Translate Service) Not Found - The server can not find the requested resource";
-							break;
-						}
-						case internal_server_err_code: {
-							error_msg = L"(Google Translate Service) Internal Server Error - The server has encountered a situation it doesn't know how to handle";
-							break;
-						}
-						case bad_gateway_code: {
-							error_msg = L"(Google Translate Service) Bad Gateway - The server was acting as a gateway or proxy and received an invalid response from the upstream server";
-							break;
-						}
-						case service_unavailable_code: {
-							error_msg = L"(Google Translate Service) Service Unavailable - The server is not ready to handle the request";
-							break;
-						}
-						default: {
-							error_msg = L"(Google Translate Service) Unexpected Error - Returned " + std::to_wstring(response_code) + L" code";
-							break;
-						}
-						}
-
-						utils::put_in_clipboard(g_hwnd, L"curl: " + error_msg);
-					}
-				}
-				else {
-					std::string msg = curl_easy_strerror(res);
-					utils::put_in_clipboard(g_hwnd, L"curl: " + std::wstring{ msg.begin(), msg.end() });
-				}
-			}
-
-			curl_easy_cleanup(curl);
-		}
-		break;
-	}
-	case WM_DESTROY: {
-		PostQuitMessage(0);
-		break;
-	}
-	}
-
-	return DefWindowProcA(h, m, w, l);
-}
-
-static void curl_escape_url(CURL* curl, const std::wstring& in, std::string& url)
-{
-	char* esc = curl_easy_escape(curl, utils::to_utf8(in).c_str(), 0);
-
-	if (esc) {
-		url += esc;
-		curl_free(esc);
-	}
-}
-
-static void free_class()
-{
-	if (g_hwnd != NULL) {
-		RemoveClipboardFormatListener(g_hwnd);
-		UnregisterClassA(LSWAP_APPLICATION_CLASS_NAME, GetModuleHandleA(NULL));
-		g_hwnd = NULL;
-	}
-}
-
-static void init_class()
-{
-	WNDCLASS wc = { 0 };
-	wc.lpfnWndProc = win_proc_h;
-	wc.hInstance = GetModuleHandleA(NULL);
-	wc.lpszClassName = LSWAP_APPLICATION_CLASS_NAME;
-
-	RegisterClassA(&wc);
-
-	g_hwnd = CreateWindowExA(0, wc.lpszClassName, LSWAP_APPLICATION_NAME, 0, 0, 0, 0, 0, NULL, NULL, wc.hInstance, NULL);
-
-	if (g_hwnd == NULL) {
-		fmt{ fmt_def, fc_red, "fatal: CreateWindowEx(...) == NULL\n" }.die();
-	}
-
-	if (AddClipboardFormatListener(g_hwnd) == FALSE) {
-		free_class();
-		fmt{ fmt_def, fc_red, "fatal: AddClipboardFormatListener(...) == FALSE\n" }.die();
-	}
-}
-
-static void free_mutex()
-{
-	ReleaseMutex(g_mutex);
-	CloseHandle(g_mutex);
-}
-
-static void init_mutex()
-{
-	g_mutex = CreateMutexA(NULL, FALSE, LSWAP_MUTEX_NAME);
-
-	if (g_mutex == NULL)
-		fmt{ fmt_30ms, fc_red, "fatal: failed to create mutex" }.die();
-
-	else if (GetLastError() == ERROR_ALREADY_EXISTS) {
-		CloseHandle(g_mutex);
-		fmt{ fmt_30ms, fc_red, "fatal: %s is already running", LSWAP_APPLICATION_NAME }.die();
-	}
 }
