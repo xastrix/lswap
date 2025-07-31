@@ -45,8 +45,8 @@ int main(int argc, const char** argv)
 
 		utils::put_in_autorun(LSWAP_APPLICATION_NAME, args[1] == "--on" ? true : false);
 
-		fmt{ fmt_30ms, fc_green, "%s successfully %s from autorun", LSWAP_APPLICATION_NAME,
-			args[1] == "--on" ? "added" : "removed"};
+		fmt{ fmt_30ms, fc_green, "%s successfully %s autorun", LSWAP_APPLICATION_NAME,
+			args[1] == "--on" ? "added to" : "removed from"};
 	});
 
 	if (argc == 1 && utils::is_in_autorun(LSWAP_APPLICATION_NAME))

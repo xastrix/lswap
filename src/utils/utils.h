@@ -75,15 +75,15 @@ namespace utils
 
 	/*
 	 * Checks whether the specified application is set to run automatically at startup.
-	 * @param app_name - the name of the application to check.
+	 * @param app_name the name of the application to check.
 	 * @return true if the application is configured to autorun, false otherwise.
 	*/
 	bool is_in_autorun(const std::string& app_name);
 
 	/*
 	 * Adds or removes an application from the system's autorun list.
-	 * @param app_name - the name of the application to add or remove.
-	 * @param v - if true, adds the application to autorun; if false, removes it.
+	 * @param app_name the name of the application to add or remove.
+	 * @param v if true, adds the application to autorun; if false, removes it.
 	*/
 	void put_in_autorun(const std::string& app_name, bool v);
 }
